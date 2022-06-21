@@ -7,13 +7,13 @@
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_1iwxh"]
 
-[sub_resource type="Sky" id="Sky_uaaoc"]
+[sub_resource type="Sky" id="Sky_sbu3y"]
 sky_material = SubResource( "PhysicalSkyMaterial_1iwxh" )
 
 [sub_resource type="Environment" id="Environment_6rgb2"]
 background_mode = 2
 background_energy = 5.0
-sky = SubResource( "Sky_uaaoc" )
+sky = SubResource( "Sky_sbu3y" )
 ambient_light_sky_contribution = 0.0
 
 [node name="Spatial" type="Node3D"]

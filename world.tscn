@@ -1,0 +1,65 @@
+[gd_scene load_steps=12 format=3 uid="uid://b3hw1wscv7hfd"]
+
+[ext_resource type="PackedScene" uid="uid://cu5m1rxv6d6v3" path="res://player.tscn" id="1_4u35d"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
+
+[sub_resource type="Sky" id="Sky_uaaoc"]
+sky_material = SubResource( "PhysicalSkyMaterial_njevo" )
+
+[sub_resource type="Environment" id="Environment_svm8j"]
+background_mode = 2
+background_energy = 5.0
+sky = SubResource( "Sky_uaaoc" )
+ambient_light_sky_contribution = 0.0
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5wujt"]
+
+[sub_resource type="VoxelGeneratorNoise2D" id="VoxelGeneratorNoise2D_d0vow"]
+channel = 0
+height_start = 0.0
+height_range = 10.0
+noise = SubResource( "FastNoiseLite_5wujt" )
+
+[sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_nfkcm"]
+voxel_name = &"Air"
+
+[sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_7vgwi"]
+geometry_type = 1
+collision_aabbs = [AABB(0, 0, 0, 1, 1, 1)]
+cube_geometry_padding_y = null
+cube_tiles_left = Vector2(0, 0)
+cube_tiles_right = Vector2(0, 0)
+cube_tiles_bottom = Vector2(0, 0)
+cube_tiles_top = Vector2(0, 0)
+cube_tiles_back = Vector2(0, 0)
+cube_tiles_front = Vector2(0, 0)
+
+[sub_resource type="VoxelBlockyLibrary" id="VoxelBlockyLibrary_fy42j"]
+voxels/0 = SubResource( "VoxelBlockyModel_nfkcm" )
+voxels/1 = SubResource( "VoxelBlockyModel_7vgwi" )
+
+[sub_resource type="VoxelMesherBlocky" id="VoxelMesherBlocky_7qrfx"]
+library = SubResource( "VoxelBlockyLibrary_fy42j" )
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_moo02"]
+vertex_color_use_as_albedo = true
+
+[node name="Node3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( "Environment_svm8j" )
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
+shadow_enabled = true
+
+[node name="VoxelTerrain" type="VoxelTerrain" parent="."]
+generator = SubResource( "VoxelGeneratorNoise2D_d0vow" )
+mesher = SubResource( "VoxelMesherBlocky_7qrfx" )
+material_override = SubResource( "StandardMaterial3D_moo02" )
+
+[node name="Player" parent="." instance=ExtResource( "1_4u35d" )]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
+
+[node name="VoxelViewer" type="VoxelViewer" parent="Player"]
