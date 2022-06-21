@@ -1,0 +1,39 @@
+[gd_scene load_steps=8 format=3 uid="uid://0ahfiydxokyo"]
+
+[ext_resource type="PackedScene" uid="uid://cu5m1rxv6d6v3" path="res://player.tscn" id="1"]
+[ext_resource type="Script" path="res://scripts/oob_detector.gd" id="3"]
+[ext_resource type="PackedScene" uid="uid://cgddmb2ylfuna" path="res://test_ramp.tscn" id="4_ouxmy"]
+[ext_resource type="PackedScene" uid="uid://5kb6qse8wdli" path="res://test_cube.tscn" id="4_t7w8x"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_1iwxh"]
+
+[sub_resource type="Sky" id="Sky_uaaoc"]
+sky_material = SubResource( "PhysicalSkyMaterial_1iwxh" )
+
+[sub_resource type="Environment" id="Environment_6rgb2"]
+background_mode = 2
+background_energy = 5.0
+sky = SubResource( "Sky_uaaoc" )
+ambient_light_sky_contribution = 0.0
+
+[node name="Spatial" type="Node3D"]
+
+[node name="OOBDetector" type="Node" parent="."]
+script = ExtResource( "3" )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( "Environment_6rgb2" )
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Player" parent="." instance=ExtResource( "1" )]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+
+[node name="Ramp" parent="." instance=ExtResource( "4_ouxmy" )]
+transform = Transform3D(50, 0, 0, 0, 2, 0, 0, 0, 20, 0, 1, -20.5)
+
+[node name="Baseplate" parent="." instance=ExtResource( "4_t7w8x" )]
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -0.5, 0)
+metadata/_edit_lock_ = true

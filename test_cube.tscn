@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://5kb6qse8wdli"]
+
+[ext_resource type="Material" uid="uid://ca7itofe4a2fl" path="res://materials/godot_icon.tres" id="1"]
+
+[sub_resource type="BoxShape3D" id="1"]
+
+[node name="Cube" type="Node3D"]
+
+[node name="CSGBox" type="CSGBox3D" parent="."]
+material = ExtResource( "1" )
+
+[node name="StaticBody" type="StaticBody3D" parent="CSGBox"]
+
+[node name="CollisionShape" type="CollisionShape3D" parent="CSGBox/StaticBody"]
+shape = SubResource( "1" )

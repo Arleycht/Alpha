@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://cu5m1rxv6d6v3"]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="1"]
+
+[sub_resource type="BoxShape3D" id="1"]
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource( "1" )
+
+[node name="Mesh" type="Node3D" parent="."]
+
+[node name="CSGBox" type="CSGBox3D" parent="Mesh"]
+
+[node name="Collider" type="CollisionShape3D" parent="."]
+shape = SubResource( "1" )
+
+[node name="SpringArm3D" type="SpringArm3D" parent="."]
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
