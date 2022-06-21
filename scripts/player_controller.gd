@@ -11,7 +11,7 @@ const CAMERA_PITCH_MIN: float = deg2rad(-89.9)
 const CAMERA_PITCH_MAX: float = deg2rad(89.9)
 
 @export var movement_type = MovementType.DEFAULT
-@export var max_speed: float = 10
+@export var max_speed: float = 4
 @export var jump_power: float = 5
 @export var ground_acceleration: float = 50
 @export var air_acceleration: float = 20
@@ -19,7 +19,6 @@ const CAMERA_PITCH_MAX: float = deg2rad(89.9)
 @export var air_friction: float = 0
 @export var gravity: Vector3 = Vector3(0, -9.8, 0)
 
-@export var up_vector: Vector3 = Vector3(0, 1, 0)
 @export var mouse_locked: bool = true
 @export var movement_locked: bool = false
 
@@ -36,9 +35,6 @@ var _landing_frames := 0
 var camera_angles: Vector3
 var override_camera: Camera3D
 
-@onready
-var _spring_arm := $SpringArm3D as SpringArm3D
-
 
 func _process(delta: float) -> void:
 	# Escape
@@ -51,8 +47,6 @@ func _process(delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	var snap := -up_vector if not _jumping else Vector3()
-	
 	velocity += gravity * delta
 	
 	move_and_slide()
@@ -74,18 +68,15 @@ func _physics_process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if event.is_action_pressed("scroll_up"):
-			camera_distance -= camera_distance_increment
-#			get_tree().set_input_as_handled()
-		elif event.is_action_pressed("scroll_down"):
-			camera_distance += camera_distance_increment
-#			get_tree().set_input_as_handled()
-	
-	if event is InputEventKey:
-		if event.is_action_pressed("jump"):
-			jump()
-#			get_tree().set_input_as_handled()
+	if event.is_action_pressed("scroll_up"):
+		camera_distance -= camera_distance_increment
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("scroll_down"):
+		camera_distance += camera_distance_increment
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("jump"):
+		jump()
+		get_viewport().set_input_as_handled()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -107,7 +98,7 @@ func get_position() -> Vector3:
 
 func jump() -> void:
 	if is_on_floor() and not _jumping:
-		velocity += up_vector * jump_power
+		velocity += up_direction * jump_power
 		_jumping = true
 
 
@@ -146,7 +137,7 @@ func _update_camera() -> void:
 	
 	var mesh_basis := Basis()
 	
-	mesh_basis = mesh_basis.rotated(up_vector, camera_angles.y)
+	mesh_basis = mesh_basis.rotated(up_direction, camera_angles.y)
 	
 	$Mesh.transform.basis = mesh_basis
 
@@ -162,7 +153,7 @@ func _update_movement(delta: float) -> void:
 	# Transform, remove vertical component, and normalize wish vector
 	
 	wish_dir = get_current_camera().global_transform.basis * wish_dir
-	wish_dir = (wish_dir - wish_dir.project(up_vector)).normalized()
+	wish_dir = (wish_dir - wish_dir.project(up_direction)).normalized()
 	
 	var acceleration := air_acceleration
 	var friction := air_friction
@@ -183,14 +174,14 @@ func _update_movement(delta: float) -> void:
 		velocity = velocity * (1 - friction) + wish_dir * acceleration
 	else:
 		# Get horizontal speeds before and after wish is applied
-		var prev_speed := (velocity - velocity.project(up_vector)).length()
+		var prev_speed := (velocity - velocity.project(up_direction)).length()
 		var new_speed: float
 		
 		velocity += wish_dir * acceleration
-		new_speed = (velocity - velocity.project(up_vector)).length()
+		new_speed = (velocity - velocity.project(up_direction)).length()
 		
 		# Separate vertical and horizontal components of velocity
-		var v := velocity.project(up_vector)
+		var v := velocity.project(up_direction)
 		var h := (velocity - v).normalized()
 		
 		# Preserve externally added velocities and limit additional wish

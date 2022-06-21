@@ -24,7 +24,7 @@ noise = SubResource( "FastNoiseLite_5wujt" )
 [sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_nfkcm"]
 voxel_name = &"Air"
 
-[sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_7vgwi"]
+[sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_wh6vv"]
 geometry_type = 1
 collision_aabbs = [AABB(0, 0, 0, 1, 1, 1)]
 cube_geometry_padding_y = null
@@ -34,10 +34,11 @@ cube_tiles_bottom = Vector2(0, 0)
 cube_tiles_top = Vector2(0, 0)
 cube_tiles_back = Vector2(0, 0)
 cube_tiles_front = Vector2(0, 0)
+collision_enabled_0 = true
 
 [sub_resource type="VoxelBlockyLibrary" id="VoxelBlockyLibrary_fy42j"]
 voxels/0 = SubResource( "VoxelBlockyModel_nfkcm" )
-voxels/1 = SubResource( "VoxelBlockyModel_7vgwi" )
+voxels/1 = SubResource( "VoxelBlockyModel_wh6vv" )
 
 [sub_resource type="VoxelMesherBlocky" id="VoxelMesherBlocky_7qrfx"]
 library = SubResource( "VoxelBlockyLibrary_fy42j" )
@@ -61,5 +62,3 @@ material_override = SubResource( "StandardMaterial3D_moo02" )
 
 [node name="Player" parent="." instance=ExtResource( "1_4u35d" )]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
-
-[node name="VoxelViewer" type="VoxelViewer" parent="Player"]
