@@ -1,6 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://b3hw1wscv7hfd"]
+[gd_scene load_steps=13 format=3 uid="uid://c5cuykyk4uwgo"]
 
-[ext_resource type="PackedScene" uid="uid://cu5m1rxv6d6v3" path="res://player.tscn" id="1_4u35d"]
+[ext_resource type="PackedScene" uid="uid://cu5m1rxv6d6v3" path="res://scenes/player.tscn" id="1_4u35d"]
+[ext_resource type="PackedScene" uid="uid://d3k8gvr6bueyu" path="res://scenes/anthropoid.tscn" id="2_euv34"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
 
@@ -17,8 +18,7 @@ ambient_light_sky_contribution = 0.0
 
 [sub_resource type="VoxelGeneratorNoise2D" id="VoxelGeneratorNoise2D_d0vow"]
 channel = 0
-height_start = 0.0
-height_range = 10.0
+height_range = 20.0
 noise = SubResource( "FastNoiseLite_5wujt" )
 
 [sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_nfkcm"]
@@ -59,6 +59,9 @@ shadow_enabled = true
 generator = SubResource( "VoxelGeneratorNoise2D_d0vow" )
 mesher = SubResource( "VoxelMesherBlocky_7qrfx" )
 material_override = SubResource( "StandardMaterial3D_moo02" )
+run_stream_in_editor = false
 
 [node name="Player" parent="." instance=ExtResource( "1_4u35d" )]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
+
+[node name="TestUnit" parent="." instance=ExtResource( "2_euv34" )]

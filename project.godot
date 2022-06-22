@@ -10,18 +10,24 @@ config_version=5
 
 _global_script_classes=[{
 "base": "CharacterBody3D",
+"class": &"Anthropoid",
+"language": &"GDScript",
+"path": "res://scripts/anthropoid.gd"
+}, {
+"base": "CharacterBody3D",
 "class": &"PlayerController",
 "language": &"GDScript",
 "path": "res://scripts/player_controller.gd"
 }]
 _global_script_class_icons={
+"Anthropoid": "",
 "PlayerController": ""
 }
 
 [application]
 
 config/name="Alpha"
-run/main_scene="res://world.tscn"
+run/main_scene="res://scenes/world.tscn"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 config/icon="res://icon.png"
 
