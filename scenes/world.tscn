@@ -1,7 +1,13 @@
-[gd_scene load_steps=13 format=3 uid="uid://c5cuykyk4uwgo"]
+[gd_scene load_steps=15 format=3 uid="uid://c5cuykyk4uwgo"]
 
 [ext_resource type="PackedScene" uid="uid://cu5m1rxv6d6v3" path="res://scenes/player.tscn" id="1_4u35d"]
+[ext_resource type="Material" uid="uid://du25kdagny8r0" path="res://materials/voxel_material.tres" id="1_8x1cd"]
 [ext_resource type="PackedScene" uid="uid://d3k8gvr6bueyu" path="res://scenes/anthropoid.tscn" id="2_euv34"]
+[ext_resource type="Shader" path="res://shaders/pixelate.gdshader" id="4_x3meo"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rtdyu"]
+shader = ExtResource( "4_x3meo" )
+shader_param/scale = null
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
 
@@ -22,9 +28,10 @@ height_range = 20.0
 noise = SubResource( "FastNoiseLite_5wujt" )
 
 [sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_nfkcm"]
-voxel_name = &"Air"
+voxel_name = &"air"
 
-[sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_wh6vv"]
+[sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_jy8j4"]
+voxel_name = &"dirt"
 geometry_type = 1
 collision_aabbs = [AABB(0, 0, 0, 1, 1, 1)]
 cube_geometry_padding_y = null
@@ -37,16 +44,37 @@ cube_tiles_front = Vector2(0, 0)
 collision_enabled_0 = true
 
 [sub_resource type="VoxelBlockyLibrary" id="VoxelBlockyLibrary_fy42j"]
+atlas_size = 1
 voxels/0 = SubResource( "VoxelBlockyModel_nfkcm" )
-voxels/1 = SubResource( "VoxelBlockyModel_wh6vv" )
+voxels/1 = SubResource( "VoxelBlockyModel_jy8j4" )
 
 [sub_resource type="VoxelMesherBlocky" id="VoxelMesherBlocky_7qrfx"]
 library = SubResource( "VoxelBlockyLibrary_fy42j" )
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_moo02"]
-vertex_color_use_as_albedo = true
-
 [node name="Node3D" type="Node3D"]
+
+[node name="Postprocessing" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="Postprocessing"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Pixelate" type="ColorRect" parent="Postprocessing/Control"]
+material = SubResource( "ShaderMaterial_rtdyu" )
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+metadata/_edit_layout_mode = 1
+metadata/_edit_use_custom_anchors = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource( "Environment_svm8j" )
@@ -58,8 +86,7 @@ shadow_enabled = true
 [node name="VoxelTerrain" type="VoxelTerrain" parent="."]
 generator = SubResource( "VoxelGeneratorNoise2D_d0vow" )
 mesher = SubResource( "VoxelMesherBlocky_7qrfx" )
-material_override = SubResource( "StandardMaterial3D_moo02" )
-run_stream_in_editor = false
+material_override = ExtResource( "1_8x1cd" )
 
 [node name="Player" parent="." instance=ExtResource( "1_4u35d" )]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
