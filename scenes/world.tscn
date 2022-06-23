@@ -54,6 +54,7 @@ library = SubResource( "VoxelBlockyLibrary_fy42j" )
 [node name="Node3D" type="Node3D"]
 
 [node name="Postprocessing" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Control" type="Control" parent="Postprocessing"]
 anchor_right = 1.0
