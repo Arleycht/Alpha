@@ -1,10 +1,10 @@
 shader_type canvas_item;
 
-uniform float scale = 6.0f;
+uniform float scale = 2.0f;
 
 void fragment() {
 	vec2 res = SCREEN_PIXEL_SIZE * scale;
-	vec2 uv = floor(UV / res) * res;
+	vec2 uv = floor(SCREEN_UV / res) * res;
 	
 	COLOR = vec4(0.0f);
 	

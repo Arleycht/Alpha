@@ -1,24 +1,12 @@
-[gd_scene load_steps=15 format=3 uid="uid://c5cuykyk4uwgo"]
+[gd_scene load_steps=19 format=3 uid="uid://bya6c6py0cup2"]
 
 [ext_resource type="PackedScene" uid="uid://cu5m1rxv6d6v3" path="res://scenes/player.tscn" id="1_4u35d"]
-[ext_resource type="Material" uid="uid://du25kdagny8r0" path="res://materials/voxel_material.tres" id="1_8x1cd"]
+[ext_resource type="Material" uid="uid://drspocmuowq1y" path="res://materials/voxel_material.tres" id="1_8x1cd"]
 [ext_resource type="PackedScene" uid="uid://d3k8gvr6bueyu" path="res://scenes/anthropoid.tscn" id="2_euv34"]
+[ext_resource type="Shader" path="res://scenes/palette.gdshader" id="3_xhnxj"]
+[ext_resource type="Texture2D" uid="uid://jo8wn4vn33tr" path="res://palettes/pico8.png" id="4_nptrx"]
 [ext_resource type="Shader" path="res://shaders/pixelate.gdshader" id="4_x3meo"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_rtdyu"]
-shader = ExtResource( "4_x3meo" )
-shader_param/scale = null
-
-[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
-
-[sub_resource type="Sky" id="Sky_uaaoc"]
-sky_material = SubResource( "PhysicalSkyMaterial_njevo" )
-
-[sub_resource type="Environment" id="Environment_svm8j"]
-background_mode = 2
-background_energy = 5.0
-sky = SubResource( "Sky_uaaoc" )
-ambient_light_sky_contribution = 0.0
+[ext_resource type="Script" path="res://scripts/texture_stitcher.gd" id="5_nnox8"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_5wujt"]
 
@@ -51,12 +39,44 @@ voxels/1 = SubResource( "VoxelBlockyModel_jy8j4" )
 [sub_resource type="VoxelMesherBlocky" id="VoxelMesherBlocky_7qrfx"]
 library = SubResource( "VoxelBlockyLibrary_fy42j" )
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6rq61"]
+shader = ExtResource( "3_xhnxj" )
+shader_param/palette = ExtResource( "4_nptrx" )
+shader_param/palette_size = 16
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rtdyu"]
+shader = ExtResource( "4_x3meo" )
+shader_param/scale = null
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
+
+[sub_resource type="Sky" id="Sky_uaaoc"]
+sky_material = SubResource( "PhysicalSkyMaterial_njevo" )
+
+[sub_resource type="Environment" id="Environment_svm8j"]
+background_mode = 2
+background_energy = 5.0
+sky = SubResource( "Sky_uaaoc" )
+ambient_light_sky_contribution = 0.0
+
 [node name="Node3D" type="Node3D"]
 
-[node name="Postprocessing" type="CanvasLayer" parent="."]
-visible = false
+[node name="Node" type="Node" parent="."]
 
-[node name="Control" type="Control" parent="Postprocessing"]
+[node name="TextureStitcher" type="Node2D" parent="."]
+script = ExtResource( "5_nnox8" )
+
+[node name="VoxelTerrain" type="VoxelTerrain" parent="."]
+generator = SubResource( "VoxelGeneratorNoise2D_d0vow" )
+mesher = SubResource( "VoxelMesherBlocky_7qrfx" )
+material_override = ExtResource( "1_8x1cd" )
+
+[node name="Postprocessing" type="CanvasLayer" parent="."]
+
+[node name="Palettize" type="CanvasLayer" parent="Postprocessing"]
+
+[node name="ColorRect" type="ColorRect" parent="Postprocessing/Palettize"]
+material = SubResource( "ShaderMaterial_6rq61" )
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -64,8 +84,13 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
+metadata/_edit_layout_mode = 1
+metadata/_edit_use_custom_anchors = true
 
-[node name="Pixelate" type="ColorRect" parent="Postprocessing/Control"]
+[node name="Pixelate" type="CanvasLayer" parent="Postprocessing"]
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="Postprocessing/Pixelate"]
 material = SubResource( "ShaderMaterial_rtdyu" )
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -83,11 +108,6 @@ environment = SubResource( "Environment_svm8j" )
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
 shadow_enabled = true
-
-[node name="VoxelTerrain" type="VoxelTerrain" parent="."]
-generator = SubResource( "VoxelGeneratorNoise2D_d0vow" )
-mesher = SubResource( "VoxelMesherBlocky_7qrfx" )
-material_override = ExtResource( "1_8x1cd" )
 
 [node name="Player" parent="." instance=ExtResource( "1_4u35d" )]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)

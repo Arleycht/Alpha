@@ -1,15 +1,11 @@
 class_name Anthropoid
-extends CharacterBody3D
+extends CharacterController3D
 
 
-var box_mover := VoxelBoxMover.new()
-var aabb := AABB(Vector3(-0.5, -0.5, -0.5), Vector3(1, 1, 1))
-@onready var terrain := $"/root/Node3D/VoxelTerrain" as VoxelTerrain
+var _box_mover := VoxelBoxMover.new()
+var _aabb := AABB(Vector3(-0.5, -0.5, -0.5), Vector3(1, 1, 1))
+var _terrain: VoxelTerrain
 
 
 func _ready() -> void:
-	print(terrain)
-
-
-func _physics_process(delta: float) -> void:
-	pass
+	_terrain = get_node(terrain_path) as VoxelTerrain
