@@ -4,7 +4,7 @@
 [ext_resource type="Material" uid="uid://drspocmuowq1y" path="res://materials/voxel_material.tres" id="1_8x1cd"]
 [ext_resource type="PackedScene" uid="uid://d3k8gvr6bueyu" path="res://scenes/anthropoid.tscn" id="2_euv34"]
 [ext_resource type="Shader" path="res://scenes/palette.gdshader" id="3_xhnxj"]
-[ext_resource type="Texture2D" uid="uid://jo8wn4vn33tr" path="res://palettes/pico8.png" id="4_nptrx"]
+[ext_resource type="Texture2D" uid="uid://70g42gr6aelk" path="res://palettes/bw.png" id="4_1m0eq"]
 [ext_resource type="Shader" path="res://shaders/pixelate.gdshader" id="4_x3meo"]
 [ext_resource type="Script" path="res://scripts/texture_stitcher.gd" id="5_nnox8"]
 
@@ -41,12 +41,13 @@ library = SubResource( "VoxelBlockyLibrary_fy42j" )
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6rq61"]
 shader = ExtResource( "3_xhnxj" )
-shader_param/palette = ExtResource( "4_nptrx" )
-shader_param/palette_size = 16
+shader_param/palette = ExtResource( "4_1m0eq" )
+shader_param/palette_size = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_rtdyu"]
 shader = ExtResource( "4_x3meo" )
-shader_param/scale = null
+shader_param/blur_strength = 0.33
+shader_param/scale = 4.0
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
 
@@ -88,7 +89,6 @@ metadata/_edit_layout_mode = 1
 metadata/_edit_use_custom_anchors = true
 
 [node name="Pixelate" type="CanvasLayer" parent="Postprocessing"]
-visible = false
 
 [node name="ColorRect" type="ColorRect" parent="Postprocessing/Pixelate"]
 material = SubResource( "ShaderMaterial_rtdyu" )
