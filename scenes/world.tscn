@@ -1,7 +1,7 @@
-[gd_scene load_steps=19 format=3 uid="uid://bya6c6py0cup2"]
+[gd_scene load_steps=19 format=3 uid="uid://0fi4p6u08y6w"]
 
-[ext_resource type="PackedScene" uid="uid://cu5m1rxv6d6v3" path="res://scenes/player.tscn" id="1_4u35d"]
-[ext_resource type="Material" uid="uid://drspocmuowq1y" path="res://materials/voxel_material.tres" id="1_8x1cd"]
+[ext_resource type="PackedScene" uid="uid://ctm0d6fccyvgp" path="res://scenes/player_character.tscn" id="1_4u35d"]
+[ext_resource type="Material" uid="uid://ckwnp54opqg7i" path="res://materials/voxel_material.tres" id="1_8x1cd"]
 [ext_resource type="PackedScene" uid="uid://d3k8gvr6bueyu" path="res://scenes/anthropoid.tscn" id="2_euv34"]
 [ext_resource type="Shader" path="res://scenes/palette.gdshader" id="3_xhnxj"]
 [ext_resource type="Texture2D" uid="uid://70g42gr6aelk" path="res://palettes/bw.png" id="4_1m0eq"]
@@ -73,7 +73,6 @@ mesher = SubResource( "VoxelMesherBlocky_7qrfx" )
 material_override = ExtResource( "1_8x1cd" )
 
 [node name="Postprocessing" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Palettize" type="CanvasLayer" parent="Postprocessing"]
 visible = false
@@ -91,6 +90,7 @@ metadata/_edit_layout_mode = 1
 metadata/_edit_use_custom_anchors = true
 
 [node name="Pixelate" type="CanvasLayer" parent="Postprocessing"]
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="Postprocessing/Pixelate"]
 material = SubResource( "ShaderMaterial_rtdyu" )

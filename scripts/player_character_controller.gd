@@ -1,4 +1,4 @@
-class_name PlayerController
+class_name PlayerCharacterController
 extends CharacterController3D
 
 

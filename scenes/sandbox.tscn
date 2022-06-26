@@ -1,9 +1,9 @@
 [gd_scene load_steps=8 format=3]
 
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player_character.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/oob_detector.gd" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/test_ramp.tscn" id="4_ouxmy"]
-[ext_resource type="PackedScene" path="res://scenes/test_cube.tscn" id="4_t7w8x"]
+[ext_resource type="PackedScene" uid="uid://cgddmb2ylfuna" path="res://scenes/test_ramp.tscn" id="4_ouxmy"]
+[ext_resource type="PackedScene" uid="uid://5kb6qse8wdli" path="res://scenes/test_cube.tscn" id="4_t7w8x"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_1iwxh"]
 

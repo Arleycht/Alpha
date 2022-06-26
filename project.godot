@@ -20,14 +20,14 @@ _global_script_classes=[{
 "path": "res://scripts/character_controller_3d.gd"
 }, {
 "base": "CharacterController3D",
-"class": &"PlayerController",
+"class": &"PlayerCharacterController",
 "language": &"GDScript",
-"path": "res://scripts/player_controller.gd"
+"path": "res://scripts/player_character_controller.gd"
 }]
 _global_script_class_icons={
 "Anthropoid": "",
 "CharacterController3D": "",
-"PlayerController": ""
+"PlayerCharacterController": ""
 }
 
 [application]
