@@ -73,8 +73,10 @@ mesher = SubResource( "VoxelMesherBlocky_7qrfx" )
 material_override = ExtResource( "1_8x1cd" )
 
 [node name="Postprocessing" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Palettize" type="CanvasLayer" parent="Postprocessing"]
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="Postprocessing/Palettize"]
 material = SubResource( "ShaderMaterial_6rq61" )

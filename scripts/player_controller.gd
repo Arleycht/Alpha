@@ -13,7 +13,7 @@ const CAMERA_PITCH_MAX: float = deg2rad(89.9)
 @export var camera_distance_max: float = 5
 @export var camera_distance_increment: float = 1
 @export var allow_camera_zoom: bool = true
-@export var camera_sensitivity: Vector2 = Vector2(0.2, 0.2)
+@export var camera_sensitivity: Vector2 = Vector2(0.1, 0.1)
 
 var camera_angles: Vector3
 var override_camera: Camera3D
