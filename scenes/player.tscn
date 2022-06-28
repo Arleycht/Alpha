@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://dldrx0jv5738e"]
+
+[ext_resource type="Script" path="res://player_controller.gd" id="1_0a341"]
+
+[node name="Player" type="Node3D"]
+script = ExtResource( "1_0a341" )
+
+[node name="SpringArm3D" type="SpringArm3D" parent="."]
+collision_mask = 0
+
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
+
+[node name="VoxelViewer" type="VoxelViewer" parent="."]
