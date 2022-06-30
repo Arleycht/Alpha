@@ -1,12 +1,12 @@
-[gd_scene load_steps=19 format=3 uid="uid://0fi4p6u08y6w"]
+[gd_scene load_steps=19 format=3 uid="uid://cbmn4iv10ha72"]
 
-[ext_resource type="Material" uid="uid://ckwnp54opqg7i" path="res://materials/voxel_material.tres" id="1_8x1cd"]
+[ext_resource type="Material" uid="uid://30tkft0t2gd7" path="res://materials/voxel_material.tres" id="1_8x1cd"]
 [ext_resource type="PackedScene" uid="uid://d3k8gvr6bueyu" path="res://scenes/anthropoid.tscn" id="2_euv34"]
 [ext_resource type="Shader" path="res://scenes/palette.gdshader" id="3_xhnxj"]
 [ext_resource type="Texture2D" uid="uid://70g42gr6aelk" path="res://palettes/bw.png" id="4_1m0eq"]
 [ext_resource type="Shader" path="res://shaders/pixelate.gdshader" id="4_x3meo"]
 [ext_resource type="Script" path="res://scripts/texture_stitcher.gd" id="5_nnox8"]
-[ext_resource type="PackedScene" uid="uid://dldrx0jv5738e" path="res://scenes/player.tscn" id="7_y4f0i"]
+[ext_resource type="PackedScene" uid="uid://xyf1gm00lilx" path="res://scenes/player.tscn" id="7_y4f0i"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_5wujt"]
 

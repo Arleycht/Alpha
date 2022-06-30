@@ -27,7 +27,7 @@ _global_script_classes=[{
 "base": "Node3D",
 "class": &"PlayerController",
 "language": &"GDScript",
-"path": "res://player_controller.gd"
+"path": "res://scripts/player_controller.gd"
 }]
 _global_script_class_icons={
 "Anthropoid": "",
