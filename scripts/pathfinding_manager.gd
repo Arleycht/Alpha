@@ -49,8 +49,8 @@ func _heuristic(a: Vector3i, b: Vector3i) -> float:
 	return (b - a).length() - 1
 
 
-func _get_neighbours(pos: Vector3i) -> Array:
-	var neighbours := []
+func _get_neighbors(pos: Vector3i) -> Array:
+	var neighbors := []
 	
 	for i in range(-1, 2):
 		for j in range(-1, 2):
@@ -58,9 +58,9 @@ func _get_neighbours(pos: Vector3i) -> Array:
 				if i == 0 and j == 0 and k == 0:
 					continue
 				
-				neighbours.append(pos + Vector3i(i, j, k))	
+				neighbors.append(pos + Vector3i(i, j, k))
 	
-	return neighbours
+	return neighbors
 
 
 func _pathfind(from: Vector3i, to: Vector3i,
@@ -105,7 +105,7 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		
 		open.erase(current)
 		
-		for n in _get_neighbours(current):
+		for n in _get_neighbors(current):
 			if not clearance_fn.call(n):
 				continue
 			
