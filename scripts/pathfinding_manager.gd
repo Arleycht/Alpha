@@ -1,31 +1,66 @@
 class_name PathfindingManager
-extends AStar3D
 
 
 var voxel_tool: VoxelTool
 
-var _current_goal: Vector3i
-var _current_path: Array
+var _thread := Thread.new()
+var _data_ready := Semaphore.new()
+var _stop_signal := Semaphore.new()
+var _stop_response := Semaphore.new()
+var _pathfind_data := {
+	'from': Vector3i(),
+	'to': Vector3i(),
+	'ready': true,
+	'clearance_fn': _is_valid_standing_position,
+	'cost_fn': _cost,
+	'heuristic_fn': _heuristic,
+	'path': [],
+}
+
+
+func _init(vt: VoxelTool) -> void:
+	voxel_tool = vt
+	_thread.start(_pathfind_thread)
 
 
 func set_path(from: Vector3, to: Vector3) -> void:
 	var from_i := Common.to_voxel_coords(from)
 	var to_i := Common.to_voxel_coords(to)
-	if to_i != _current_goal:
-		_current_goal = to_i
-		_current_path = _pathfind(from_i, to_i)
+	var stale := false
+	
+	if is_path_empty() or from_i != _pathfind_data['path'][0] or to_i != _pathfind_data['path'][-1]:
+		stop()
+		_pathfind_data['from'] = from_i
+		_pathfind_data['to'] = to_i
+		_pathfind_data['ready'] = false
+		_data_ready.post()
 
 
-func get_current_path() -> Array:
-	return _current_path
+func is_ready() -> bool:
+	return _pathfind_data['ready'] as bool
+
+
+func stop() -> void:
+	if is_ready():
+		return
+	
+	var t := Thread.new()
+	t.start(_stop_response.wait)
+	_stop_signal.post()
+	t.wait_to_finish()
+
+
+func get_current() -> Vector3:
+	return Common.to_real_coords(_pathfind_data['path'].back()) - Vector3(0, 0.5, 0)
 
 
 func increment_path() -> void:
-	_current_path.pop_front()
+	# Probably not thread safe
+	_pathfind_data['path'].pop_back()
 
 
 func is_path_empty() -> bool:
-	return _current_path == null or _current_path.size() < 1
+	return _pathfind_data['path'].size() < 1
 
 
 func _is_valid_floor(pos: Vector3i) -> bool:
@@ -102,63 +137,65 @@ func _get_neighbors(pos: Vector3i) -> Array:
 	return neighbors
 
 
-func _pathfind(from: Vector3i, to: Vector3i,
-		clearance_fn: Callable = _is_valid_standing_position,
-		heuristic_fn: Callable = _heuristic,
-		max_path_length: int = 4096) -> Array:
-	## Returns an array of valid path positions that connect two positions or
-	## an empty array if no valid path exists.
-	##
-	## Clearance function should accept two arguments in the form of:
-	## VoxelTool, Vector3i
-	## and return true if the given position can be cleared by whatever that is
-	## finding the path.
-	
-	if not clearance_fn.call(from) or not clearance_fn.call(to):
-		print("From/to invalid")
-		return []
-	
-	var open := [from]
-	var map := {}
-	var g_score := {}
-	var f_score := {}
-	
-	g_score[from] = 0.0
-	f_score[from] = heuristic_fn.call(from, to)
-	
-	while open.size() > 0:
-		var sorted_f_scores = f_score.keys().filter(func(x): return x in open)
-		sorted_f_scores.sort_custom(func(a, b): return f_score[a] < f_score[b])
+func _pathfind_thread() -> void:
+	while true:
+		_data_ready.wait()
 		
-		var current = sorted_f_scores[0]
+		var from := _pathfind_data['from'] as Vector3i
+		var to := _pathfind_data['to'] as Vector3i
+		var clearance_fn := _pathfind_data['clearance_fn'] as Callable
+		var cost_fn := _pathfind_data['cost_fn'] as Callable
+		var heuristic_fn := _pathfind_data['heuristic_fn'] as Callable
 		
-		if current == to:
-			var path := [current]
+		if not clearance_fn.call(from) or not clearance_fn.call(to):
+			continue
+		
+		var open := [from]
+		var map := {}
+		var g_score := {}
+		var f_score := {}
+		
+		g_score[from] = 0.0
+		f_score[from] = heuristic_fn.call(from, to)
+		
+		while open.size() > 0:
+			if _stop_signal.try_wait() == OK:
+				_pathfind_data['path'] = []
+				_pathfind_data['ready'] = true
+				_stop_response.post()
+				break
 			
-			while current in map:
-				current = map[current]
-				path.append(current)
+			var sorted_f_scores = f_score.keys().filter(func(x): return x in open)
+			sorted_f_scores.sort_custom(func(a, b): return f_score[a] < f_score[b])
 			
-			path.reverse()
-			return path
-		
-		open.erase(current)
-		
-		var neighbors = _get_neighbors(current)
-		neighbors.shuffle()
-		
-		for n in neighbors:
-			if not clearance_fn.call(n) or not _is_traversal_clear(current, n):
-				continue
+			var current = sorted_f_scores[0]
 			
-			var new_g_score = g_score[current] + _cost(current, n)
-			
-			if n not in g_score or new_g_score < g_score[n]:
-				map[n] = current
-				g_score[n] = new_g_score
-				f_score[n] = new_g_score + heuristic_fn.call(n, to)
+			if current == to:
+				var path := [current]
 				
-				if n not in open:
-					open.append(n)
-	
-	return []
+				while current in map:
+					current = map[current]
+					path.append(current)
+				
+				_pathfind_data['path'] = path
+				_pathfind_data['ready'] = true
+				break
+			
+			open.erase(current)
+			
+			var neighbors = _get_neighbors(current)
+			neighbors.shuffle()
+			
+			for n in neighbors:
+				if not clearance_fn.call(n) or not _is_traversal_clear(current, n):
+					continue
+				
+				var new_g_score = g_score[current] + _cost(current, n)
+				
+				if n not in g_score or new_g_score < g_score[n]:
+					map[n] = current
+					g_score[n] = new_g_score
+					f_score[n] = new_g_score + heuristic_fn.call(n, to)
+					
+					if n not in open:
+						open.append(n)

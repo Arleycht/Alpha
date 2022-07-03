@@ -9,7 +9,7 @@
 config_version=5
 
 _global_script_classes=[{
-"base": "CharacterBody3D",
+"base": "CharacterController3D",
 "class": &"Anthropoid",
 "language": &"GDScript",
 "path": "res://scripts/anthropoid.gd"
@@ -24,7 +24,7 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/common.gd"
 }, {
-"base": "AStar3D",
+"base": "RefCounted",
 "class": &"PathfindingManager",
 "language": &"GDScript",
 "path": "res://scripts/pathfinding_manager.gd"

@@ -2,58 +2,69 @@ class_name CharacterController3D
 extends CharacterBody3D
 
 
-@export var max_speed: float = 4
-@export var jump_power: float = 5
-@export var ground_acceleration: float = 50
-@export var air_acceleration: float = 10
-@export var ground_friction: float = 10
-@export var air_friction: float = 0
-@export var gravity: Vector3 = Vector3(0, -9.8, 0)
+signal jumped
+signal landed
+
+@export var max_speed := 3.0
+@export var jump_height := 1.0
+@export var ground_acceleration := 50.0
+@export var air_acceleration := 50.0
+@export var ground_friction := 0.2
+@export var air_friction := 0.1
+@export var gravity_strength := 9.8
+@export var gravity_direction: Vector3 = Vector3.DOWN
 @export_node_path(VoxelTerrain) var terrain_path: NodePath
 
 var wish_vector := Vector3()
 
-# Jump with buffered input
-var _jump_buffer_frames := 0
 var _ground_frames := 0
+var _jumping := false
+var _jump_buffered := false
 
 var _terrain: VoxelTerrain
 var _voxel_tool: VoxelTool
+var _pathfinder: PathfindingManager
 
 
 func _ready() -> void:
 	_terrain = get_node(terrain_path) as VoxelTerrain
 	_voxel_tool = _terrain.get_voxel_tool() as VoxelTool
+	_pathfinder = PathfindingManager.new(_voxel_tool)
 
 
 func _physics_process(delta: float) -> void:
-	velocity += gravity * delta
+	velocity += gravity_direction * gravity_strength * delta
 	_update_movement(delta)
-	
 	move_and_slide()
 	
-	# Fix a weird bug where the velocity while moving on the ground
-	# incorporates a gravity component?
-	# I think this is an engine issue, and I don't feel like reprogramming the
-	# move_and_slide function
 	if is_on_floor():
-		# Jump immediately if buffered
-		if _jump_buffer_frames > 1:
-			velocity -= velocity.project(gravity.normalized())
-			
-			_ground_frames += 1
-		else:
+		if _ground_frames == 0:
+			emit_signal("landed")
+		
+		_jumping = false
+		
+		# Skip ground frame for friction calculation if the jump is buffered
+		if _jump_buffered:
 			jump()
+		else:
+			velocity -= velocity.project(gravity_direction)
+			_ground_frames += 1
 	else:
 		_ground_frames = 0
-	
-	_jump_buffer_frames += 1
 
 
-func jump() -> void:
-	if is_on_floor():
-		velocity += up_direction * jump_power
-		_ground_frames = 0
+func jump() -> bool:
+	if is_on_floor() and not _jumping:
+		velocity += -gravity_direction * sqrt(2 * gravity_strength * jump_height)
+		velocity += -gravity_direction * gravity_strength * get_physics_process_delta_time()
+		_jumping = true
+		_jump_buffered = false
+		emit_signal("jumped")
+		return true
+	elif not _jump_buffered:
+		_jump_buffered = true
+		return true
+	return false
 
 
 func _update_movement(delta: float) -> void:
@@ -68,12 +79,12 @@ func _update_movement(delta: float) -> void:
 	var friction := air_friction
 	
 	# Only apply ground friction after the first frame of landing
-	if is_on_floor() and _ground_frames > 0:
+	# Allows for a form of bunny hopping
+	if _ground_frames > 0:
 		acceleration = ground_acceleration
 		friction = ground_friction
 	
 	acceleration *= delta
-	friction *= delta
 	
 	# Get horizontal speeds before and after wish is applied
 	var prev_speed := h_plane.project(velocity).length()
@@ -88,7 +99,7 @@ func _update_movement(delta: float) -> void:
 	
 	# Reduce friction while wish is active so max speed is achieved
 	# mostly accurately
-	friction *= 1 - wish_strength
+#	friction *= 1 - wish_strength
 	
 	# Preserve externally added velocities and limit additional wish
 	# velocity to horizontal component
