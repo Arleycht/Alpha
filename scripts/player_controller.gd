@@ -181,7 +181,7 @@ func clear_selection() -> void:
 
 
 func get_current_camera() -> Camera3D:
-	if get_node(override_camera_path) != null:
+	if get_node_or_null(override_camera_path) != null:
 		return get_node(override_camera_path)
 	
 	return _get_internal_camera()
