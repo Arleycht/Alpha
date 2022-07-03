@@ -4,5 +4,5 @@
 
 [resource]
 vertex_color_use_as_albedo = true
-albedo_texture = ExtResource( "1_fcsc8" )
+albedo_texture = ExtResource("1_fcsc8")
 texture_filter = 0

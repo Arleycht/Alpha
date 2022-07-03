@@ -9,7 +9,7 @@
 config_version=5
 
 _global_script_classes=[{
-"base": "CharacterController3D",
+"base": "CharacterBody3D",
 "class": &"Anthropoid",
 "language": &"GDScript",
 "path": "res://scripts/anthropoid.gd"
@@ -18,6 +18,16 @@ _global_script_classes=[{
 "class": &"CharacterController3D",
 "language": &"GDScript",
 "path": "res://scripts/character_controller_3d.gd"
+}, {
+"base": "Node",
+"class": &"Common",
+"language": &"GDScript",
+"path": "res://scripts/common.gd"
+}, {
+"base": "AStar3D",
+"class": &"PathfindingManager",
+"language": &"GDScript",
+"path": "res://scripts/pathfinding_manager.gd"
 }, {
 "base": "CharacterController3D",
 "class": &"PlayerCharacterController",
@@ -32,6 +42,8 @@ _global_script_classes=[{
 _global_script_class_icons={
 "Anthropoid": "",
 "CharacterController3D": "",
+"Common": "",
+"PathfindingManager": "",
 "PlayerCharacterController": "",
 "PlayerController": ""
 }

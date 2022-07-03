@@ -1,6 +1,7 @@
-[gd_scene load_steps=19 format=3 uid="uid://cbmn4iv10ha72"]
+[gd_scene load_steps=20 format=3 uid="uid://cbmn4iv10ha72"]
 
-[ext_resource type="Material" uid="uid://30tkft0t2gd7" path="res://materials/voxel_material.tres" id="1_8x1cd"]
+[ext_resource type="Material" uid="uid://ckwnp54opqg7i" path="res://materials/voxel_material.tres" id="1_8x1cd"]
+[ext_resource type="Script" path="res://scripts/environment_lighting.gd" id="2_dkxyg"]
 [ext_resource type="PackedScene" uid="uid://d3k8gvr6bueyu" path="res://scenes/anthropoid.tscn" id="2_euv34"]
 [ext_resource type="Shader" path="res://scenes/palette.gdshader" id="3_xhnxj"]
 [ext_resource type="Texture2D" uid="uid://70g42gr6aelk" path="res://palettes/bw.png" id="4_1m0eq"]
@@ -8,12 +9,34 @@
 [ext_resource type="Script" path="res://scripts/texture_stitcher.gd" id="5_nnox8"]
 [ext_resource type="PackedScene" uid="uid://xyf1gm00lilx" path="res://scenes/player.tscn" id="7_y4f0i"]
 
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
+
+[sub_resource type="Sky" id="Sky_uaaoc"]
+sky_material = SubResource("PhysicalSkyMaterial_njevo")
+process_mode = 3
+
+[sub_resource type="Environment" id="Environment_svm8j"]
+background_mode = 2
+sky = SubResource("Sky_uaaoc")
+ambient_light_source = 3
+ambient_light_color = Color(0.0627451, 0.0627451, 0.0627451, 1)
+ambient_light_sky_contribution = 0.0
+reflected_light_source = 2
+tonemap_mode = 2
+auto_exposure_enabled = true
+auto_exposure_scale = 0.2
+auto_exposure_speed = 1.0
+ssr_enabled = true
+ssao_enabled = true
+ssil_enabled = true
+fog_density = 0.0165
+
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_5wujt"]
 
 [sub_resource type="VoxelGeneratorNoise2D" id="VoxelGeneratorNoise2D_d0vow"]
 channel = 0
-height_range = 20.0
-noise = SubResource( "FastNoiseLite_5wujt" )
+height_range = 50.0
+noise = SubResource("FastNoiseLite_5wujt")
 
 [sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_nfkcm"]
 voxel_name = &"air"
@@ -33,44 +56,47 @@ collision_enabled_0 = true
 
 [sub_resource type="VoxelBlockyLibrary" id="VoxelBlockyLibrary_fy42j"]
 atlas_size = 1
-voxels/0 = SubResource( "VoxelBlockyModel_nfkcm" )
-voxels/1 = SubResource( "VoxelBlockyModel_jy8j4" )
+voxels/0 = SubResource("VoxelBlockyModel_nfkcm")
+voxels/1 = SubResource("VoxelBlockyModel_jy8j4")
 
 [sub_resource type="VoxelMesherBlocky" id="VoxelMesherBlocky_7qrfx"]
-library = SubResource( "VoxelBlockyLibrary_fy42j" )
+library = SubResource("VoxelBlockyLibrary_fy42j")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6rq61"]
-shader = ExtResource( "3_xhnxj" )
-shader_param/palette = ExtResource( "4_1m0eq" )
+shader = ExtResource("3_xhnxj")
+shader_param/palette = ExtResource("4_1m0eq")
 shader_param/palette_size = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_rtdyu"]
-shader = ExtResource( "4_x3meo" )
+shader = ExtResource("4_x3meo")
 shader_param/blur_strength = 0.33
 shader_param/scale = 4.0
-
-[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
-
-[sub_resource type="Sky" id="Sky_uaaoc"]
-sky_material = SubResource( "PhysicalSkyMaterial_njevo" )
-
-[sub_resource type="Environment" id="Environment_svm8j"]
-background_mode = 2
-background_energy = 5.0
-sky = SubResource( "Sky_uaaoc" )
-ambient_light_sky_contribution = 0.0
 
 [node name="Node3D" type="Node3D"]
 
 [node name="Node" type="Node" parent="."]
 
 [node name="TextureStitcher" type="Node2D" parent="."]
-script = ExtResource( "5_nnox8" )
+script = ExtResource("5_nnox8")
+
+[node name="Environment" type="Node3D" parent="."]
+script = ExtResource("2_dkxyg")
+environment_path = NodePath("WorldEnvironment")
+sun_path = NodePath("Sun")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
+environment = SubResource("Environment_svm8j")
+
+[node name="Sun" type="DirectionalLight3D" parent="Environment"]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
+shadow_enabled = true
+shadow_reverse_cull_face = true
 
 [node name="VoxelTerrain" type="VoxelTerrain" parent="."]
-generator = SubResource( "VoxelGeneratorNoise2D_d0vow" )
-mesher = SubResource( "VoxelMesherBlocky_7qrfx" )
-material_override = ExtResource( "1_8x1cd" )
+generator = SubResource("VoxelGeneratorNoise2D_d0vow")
+mesher = SubResource("VoxelMesherBlocky_7qrfx")
+gi_mode = 2
+material_override = ExtResource("1_8x1cd")
 
 [node name="Postprocessing" type="CanvasLayer" parent="."]
 
@@ -78,7 +104,7 @@ material_override = ExtResource( "1_8x1cd" )
 visible = false
 
 [node name="ColorRect" type="ColorRect" parent="Postprocessing/Palettize"]
-material = SubResource( "ShaderMaterial_6rq61" )
+material = SubResource("ShaderMaterial_6rq61")
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -93,7 +119,7 @@ metadata/_edit_use_custom_anchors = true
 visible = false
 
 [node name="ColorRect" type="ColorRect" parent="Postprocessing/Pixelate"]
-material = SubResource( "ShaderMaterial_rtdyu" )
+material = SubResource("ShaderMaterial_rtdyu")
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -104,13 +130,11 @@ mouse_filter = 2
 metadata/_edit_layout_mode = 1
 metadata/_edit_use_custom_anchors = true
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( "Environment_svm8j" )
+[node name="TestUnit" parent="." instance=ExtResource("2_euv34")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0.5)
+terrain_path = NodePath("../VoxelTerrain")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
-shadow_enabled = true
-
-[node name="TestUnit" parent="." instance=ExtResource( "2_euv34" )]
-
-[node name="Player" parent="." instance=ExtResource( "7_y4f0i" )]
+[node name="Player" parent="." instance=ExtResource("7_y4f0i")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, -2)
+terrain_path = NodePath("../VoxelTerrain")
+camera_angles = Vector3(-0.785, 3.142, 0)

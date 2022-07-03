@@ -25,5 +25,3 @@ func _ready() -> void:
 			print("Failed to load %s" % file_name)
 	
 	var atlas_size := nearest_po2(textures.size())
-	
-	print(atlas_size)
