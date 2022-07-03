@@ -1,5 +1,5 @@
-extends Node
 class_name Common
+extends Node
 
 
 static func to_voxel_coords(v: Vector3) -> Vector3i:

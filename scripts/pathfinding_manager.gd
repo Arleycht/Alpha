@@ -1,5 +1,5 @@
-extends AStar3D
 class_name PathfindingManager
+extends AStar3D
 
 
 var voxel_tool: VoxelTool
