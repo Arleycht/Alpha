@@ -45,8 +45,47 @@ func _is_valid_standing_position(pos: Vector3i) -> bool:
 	return _is_valid_floor(pos - Vector3i(0, 1, 0)) and _is_valid_air(pos)
 
 
+func _cost(a: Vector3i, b: Vector3i) -> float:
+	var h := Vector3i(b.x - a.x, 0, b.z - a.z).length_squared() as float
+	var v := abs(b.y - a.y) as float
+	
+	if b.y > a.y:
+		# Approximation of 2*sqrt(2) to disincentivize climbing
+		v *= 2.8
+	else:
+		# Incentivize dropping down
+		v = 0
+	
+	return h + v
+
+
 func _heuristic(a: Vector3i, b: Vector3i) -> float:
-	return (b - a).length() - 1
+	return abs(b.x - a.x) + abs(b.y - a.y) + abs(b.z - a.z)
+
+
+func _is_traversal_clear(from: Vector3i, to: Vector3i) -> bool:
+	var current := from
+	var delta := sign(to - from) as Vector3i
+	var dx = Vector3i(delta.x, 0, 0)
+	var dy = Vector3i(0, delta.y, 0)
+	var dz = Vector3i(0, 0, delta.z)
+	
+	var i = 0
+	
+	while current != to:
+		if current.x != to.x and _is_valid_standing_position(current + dx):
+			current += dx
+		elif current.z != to.z and _is_valid_standing_position(current + dz):
+			current += dz
+		elif current.y != to.y:
+			if delta.y > 0 and !_is_valid_air(current + dy):
+				return false
+			else:
+				current += dy
+		else:
+			return false
+	
+	return true
 
 
 func _get_neighbors(pos: Vector3i) -> Array:
@@ -105,11 +144,14 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		
 		open.erase(current)
 		
-		for n in _get_neighbors(current):
-			if not clearance_fn.call(n):
+		var neighbors = _get_neighbors(current)
+		neighbors.shuffle()
+		
+		for n in neighbors:
+			if not clearance_fn.call(n) or not _is_traversal_clear(current, n):
 				continue
 			
-			var new_g_score = g_score[current] + 1
+			var new_g_score = g_score[current] + _cost(current, n)
 			
 			if n not in g_score or new_g_score < g_score[n]:
 				map[n] = current

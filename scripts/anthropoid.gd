@@ -10,7 +10,7 @@ var voxel_tool: VoxelTool
 @export var nickname: String = ""
 @export var last_name: String = "Alpha"
 
-@export var movement_speed := 2.0
+@export var movement_speed := 3.0
 @export var jump_height := 1.0
 @export var gravity := 9.8
 
