@@ -20,9 +20,12 @@ func update() -> void:
 	if not is_path_empty():
 		var target := get_position()
 		var close_enough := maxf(character.get_aabb().size.x, character.get_aabb().size.z)
+		var last := (_path_index == _path.size() - 1)
 		
-		if close_enough > 0.5:
-			close_enough *= 0.25
+		if last:
+			close_enough *= 0.1
+		elif close_enough > 0.5:
+			close_enough *= 0.5
 		else:
 			close_enough = 0.5
 		
@@ -30,21 +33,18 @@ func update() -> void:
 		
 		var diff := target - character.position
 		var h_diff := Plane.PLANE_XZ.project(diff)
-		var direction := h_diff.limit_length()
-		character.wish_vector = direction
+		character.wish_vector = h_diff.normalized() * clampf(h_diff.length(), 0.1, 1)
 		
 		if diff.y > character.jump_height * 0.75:
 			if h_diff.length_squared() < 2 and not character.is_jumping():
 				character.jump()
-		elif diff.y < -0.75:
-			# Make proportional to the drop height?
+		elif diff.y < -0.75 or last:
+			# Precision movement mode for descending and last waypoint
 			const speed_limit := 2.5
 			var speed := Plane.PLANE_XZ.project(character.velocity).length()
 			
 			if speed > speed_limit:
-				character.wish_vector *= 1 - clampf(speed / speed_limit, 0, 1)
-			else:
-				character.wish_vector *= speed_limit / character.max_speed
+				character.wish_vector *= -1
 		
 		# Increment path position
 		
