@@ -1,9 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://xyf1gm00lilx"]
+[gd_scene load_steps=3 format=3 uid="uid://xyf1gm00lilx"]
 
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_0a341"]
+[ext_resource type="PackedScene" uid="uid://cpqxi4s4p6262" path="res://scenes/hud.tscn" id="2_2no0u"]
 
 [node name="Player" type="Node3D"]
-script = ExtResource( "1_0a341" )
+script = ExtResource("1_0a341")
+
+[node name="HUD" parent="." instance=ExtResource("2_2no0u")]
 
 [node name="SpringArm3D" type="SpringArm3D" parent="."]
 collision_mask = 0

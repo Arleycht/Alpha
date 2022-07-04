@@ -24,10 +24,10 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/common.gd"
 }, {
-"base": "RefCounted",
-"class": &"PathfindingManager",
+"base": "Resource",
+"class": &"Navigator",
 "language": &"GDScript",
-"path": "res://scripts/pathfinding_manager.gd"
+"path": "res://scripts/navigator.gd"
 }, {
 "base": "CharacterController3D",
 "class": &"PlayerCharacterController",
@@ -43,7 +43,7 @@ _global_script_class_icons={
 "Anthropoid": "",
 "CharacterController3D": "",
 "Common": "",
-"PathfindingManager": "",
+"Navigator": "",
 "PlayerCharacterController": "",
 "PlayerController": ""
 }

@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://cpqxi4s4p6262"]
+
+[ext_resource type="Theme" uid="uid://lurlpuan1ya5" path="res://themes/default.tres" id="1_7w0pi"]
+
+[node name="HUD" type="Control"]
+texture_filter = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = ExtResource("1_7w0pi")
+metadata/_edit_layout_mode = 1

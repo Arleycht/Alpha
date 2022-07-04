@@ -8,7 +8,7 @@ signal landed
 @export var max_speed := 3.0
 @export var jump_height := 1.0
 @export var ground_acceleration := 50.0
-@export var air_acceleration := 50.0
+@export var air_acceleration := 20.0
 @export var ground_friction := 0.2
 @export var air_friction := 0.1
 @export var gravity_strength := 9.8
@@ -16,6 +16,7 @@ signal landed
 @export_node_path(VoxelTerrain) var terrain_path: NodePath
 
 var wish_vector := Vector3()
+var navigator: Navigator
 
 var _ground_frames := 0
 var _jumping := false
@@ -23,16 +24,18 @@ var _jump_buffered := false
 
 var _terrain: VoxelTerrain
 var _voxel_tool: VoxelTool
-var _pathfinder: PathfindingManager
 
 
 func _ready() -> void:
 	_terrain = get_node(terrain_path) as VoxelTerrain
 	_voxel_tool = _terrain.get_voxel_tool() as VoxelTool
-	_pathfinder = PathfindingManager.new(_voxel_tool)
+	navigator = Navigator.new(self, _voxel_tool)
 
 
 func _physics_process(delta: float) -> void:
+	wish_vector = Vector3()
+	navigator.update()
+	
 	velocity += gravity_direction * gravity_strength * delta
 	_update_movement(delta)
 	move_and_slide()
@@ -53,6 +56,20 @@ func _physics_process(delta: float) -> void:
 		_ground_frames = 0
 
 
+func get_aabb() -> AABB:
+	var aabb := AABB()
+	
+	for c in find_children("", "CollisionShape3D", true):
+		if c is CollisionShape3D:
+			aabb = aabb.merge(c.shape.get_debug_mesh().get_aabb())
+	
+	return aabb
+
+
+func move_to(to: Vector3) -> void:
+	navigator.move_to(position, to)
+
+
 func jump() -> bool:
 	if is_on_floor() and not _jumping:
 		velocity += -gravity_direction * sqrt(2 * gravity_strength * jump_height)
@@ -65,6 +82,10 @@ func jump() -> bool:
 		_jump_buffered = true
 		return true
 	return false
+
+
+func is_jumping() -> bool:
+	return _jumping or _jump_buffered
 
 
 func _update_movement(delta: float) -> void:
