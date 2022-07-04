@@ -1,6 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://d3k8gvr6bueyu"]
+[gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://scripts/anthropoid.gd" id="1_1sju3"]
+[ext_resource type="Script" path="res://scripts/character/anthropoid.gd" id="1_1sju3"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_uf1yr"]
 radius = 0.125

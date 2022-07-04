@@ -136,8 +136,6 @@ func _is_traversal_clear(from: Vector3i, to: Vector3i) -> bool:
 	var dy = Vector3i(0, delta.y, 0)
 	var dz = Vector3i(0, 0, delta.z)
 	
-	var i = 0
-	
 	while current != to:
 		if current.x != to.x and _is_valid_standing_position(current + dx):
 			current += dx
@@ -172,10 +170,14 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		clearance_fn: Callable = _is_valid_standing_position,
 		cost_fn: Callable = _cost, heuristic_fn: Callable = _heuristic,
 		max_path_length: int = 1024) -> void:
+	# If the character is standing over an invalid position, but is actually
+	# standing on the edge of a valid position, try to find the valid position
+	# and use it as the origin instead
 	if not clearance_fn.call(from):
 		var found := false
-		for i in range(-1, 2):
-			for j in range(-1, 2):
+		var w := ceil(character.get_aabb().get_longest_axis_size()) as int
+		for i in range(-w, w + 1):
+			for j in range(-w, w + 1):
 				if clearance_fn.call(from + Vector3i(i, 0, j)):
 					from += Vector3i(i, 0, j)
 					found = true
@@ -199,8 +201,6 @@ func _pathfind(from: Vector3i, to: Vector3i,
 	length[from] = 0
 	g_score[from] = 0.0
 	f_score[from] = heuristic_fn.call(from, to)
-	
-	var count := 0
 	
 	while open.size() > 0:
 		var sorted_f_scores = f_score.keys().filter(func(x): return x in open)
@@ -229,8 +229,6 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		var neighbors = _get_neighbors(current)
 		neighbors.shuffle()
 		
-		count += 1
-		
 		for n in neighbors:
 			if not voxel_tool.is_area_editable(AABB(n, Vector3.ONE)):
 				continue
@@ -238,7 +236,7 @@ func _pathfind(from: Vector3i, to: Vector3i,
 			if not clearance_fn.call(n) or not _is_traversal_clear(current, n):
 				continue
 			
-			var new_g_score = g_score[current] + _cost(current, n)
+			var new_g_score = g_score[current] + cost_fn.call(current, n)
 			
 			if n not in g_score or new_g_score < g_score[n]:
 				map[n] = current
