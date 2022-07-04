@@ -6,7 +6,10 @@
 [node name="Player" type="Node3D"]
 script = ExtResource("1_0a341")
 
-[node name="HUD" parent="." instance=ExtResource("2_2no0u")]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="HUD" parent="CanvasLayer" instance=ExtResource("2_2no0u")]
 
 [node name="SpringArm3D" type="SpringArm3D" parent="."]
 collision_mask = 0

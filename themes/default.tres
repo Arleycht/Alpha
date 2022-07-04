@@ -12,6 +12,5 @@ axis_stretch_vertical = 1
 region_rect = Rect2(0, 0, 32, 32)
 
 [resource]
-Button/constants/h_separation = 0
 Button/styles/normal = SubResource("StyleBoxFlat_k7at8")
 PanelContainer/styles/panel = SubResource("StyleBoxTexture_ims6k")
