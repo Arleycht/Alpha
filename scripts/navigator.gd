@@ -2,7 +2,7 @@ class_name Navigator
 extends Resource
 
 
-var character: CharacterController3D
+var character: Character
 var voxel_tool: VoxelTool
 
 var _path: Array
@@ -11,7 +11,7 @@ var _prev_check_msec: int
 var _prev_pos: Vector3
 
 
-func _init(character: CharacterController3D, voxel_tool: VoxelTool) -> void:
+func _init(character: Character, voxel_tool: VoxelTool) -> void:
 	self.character = character
 	self.voxel_tool = voxel_tool
 
@@ -28,6 +28,10 @@ func update() -> void:
 			close_enough *= 0.5
 		else:
 			close_enough = 0.5
+		
+		# TODO: Check if the current waypoint is part of a horizontal corner
+		# that is blocked on one side, and adjust the waypoint to make the
+		# path and movement smoother
 		
 		# Move character
 		

@@ -1,5 +1,5 @@
 class_name Anthropoid
-extends CharacterController3D
+extends Character
 
 
 @export var first_name: String = "Era"

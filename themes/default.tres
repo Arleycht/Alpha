@@ -1,6 +1,6 @@
-[gd_resource type="Theme" load_steps=4 format=3 uid="uid://lurlpuan1ya5"]
+[gd_resource type="Theme" load_steps=4 format=3]
 
-[ext_resource type="Texture2D" uid="uid://ci4nkjs03khhm" path="res://textures/null.png" id="1_ulx8o"]
+[ext_resource type="Texture2D" path="res://textures/voxels/null.png" id="1_ulx8o"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k7at8"]
 bg_color = Color(0.5, 0.5, 0.5, 1)

@@ -1,9 +1,8 @@
-[gd_scene load_steps=15 format=3 uid="uid://bgb3ilugbxjuf"]
+[gd_scene load_steps=14 format=3 uid="uid://bgb3ilugbxjuf"]
 
-[ext_resource type="Material" uid="uid://ckwnp54opqg7i" path="res://materials/voxel_material.tres" id="1_8x1cd"]
+[ext_resource type="Material" path="res://materials/voxel_material.tres" id="1_8x1cd"]
 [ext_resource type="Script" path="res://scripts/environment_lighting.gd" id="2_dkxyg"]
-[ext_resource type="PackedScene" path="res://scenes/anthropoid.tscn" id="2_euv34"]
-[ext_resource type="Script" path="res://scripts/texture_stitcher.gd" id="5_nnox8"]
+[ext_resource type="PackedScene" uid="uid://cqyx6qlmpnfd5" path="res://scenes/anthropoid.tscn" id="2_euv34"]
 [ext_resource type="PackedScene" uid="uid://bys8uhw7yyiom" path="res://scenes/player.tscn" id="7_y4f0i"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
@@ -32,6 +31,7 @@ fog_density = 0.0165
 
 [sub_resource type="VoxelGeneratorNoise2D" id="VoxelGeneratorNoise2D_d0vow"]
 channel = 0
+height_start = -25.0
 height_range = 50.0
 noise = SubResource("FastNoiseLite_5wujt")
 
@@ -59,12 +59,7 @@ voxels/1 = SubResource("VoxelBlockyModel_jy8j4")
 [sub_resource type="VoxelMesherBlocky" id="VoxelMesherBlocky_7qrfx"]
 library = SubResource("VoxelBlockyLibrary_fy42j")
 
-[node name="Node3D" type="Node3D"]
-
-[node name="Node" type="Node" parent="."]
-
-[node name="TextureStitcher" type="Node2D" parent="."]
-script = ExtResource("5_nnox8")
+[node name="World" type="Node3D"]
 
 [node name="Environment" type="Node3D" parent="."]
 script = ExtResource("2_dkxyg")
@@ -89,6 +84,11 @@ material_override = ExtResource("1_8x1cd")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0.5)
 terrain_path = NodePath("../VoxelTerrain")
 
+[node name="TestUnit2" parent="." instance=ExtResource("2_euv34")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 1.5)
+terrain_path = NodePath("../VoxelTerrain")
+
 [node name="Player" parent="." instance=ExtResource("7_y4f0i")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, -2)
+process_mode = 3
+transform = Transform3D(-1, 4.37114e-08, -7.57103e-08, 0, 0.866025, 0.5, 8.74228e-08, 0.5, -0.866025, 0, 4, -5)
 terrain_path = NodePath("../VoxelTerrain")

@@ -1,4 +1,4 @@
-class_name CharacterController3D
+class_name Character
 extends CharacterBody3D
 
 
@@ -38,7 +38,22 @@ func _physics_process(delta: float) -> void:
 	
 	velocity += gravity_direction * gravity_strength * delta
 	_update_movement(delta)
-	move_and_slide()
+	var collided := move_and_slide()
+	
+	# Handle collisions with other characters
+	if collided:
+		var handled := []
+		
+		for i in get_slide_collision_count():
+			var collision := get_slide_collision(i)
+			var collider := collision.get_collider()
+			
+			if collider is Character and collider not in handled:
+				var other := collision.get_collider() as Character
+				var direction := other.position - position
+				var r := Vector3(0, 0, 1).rotated(up_direction, randf() * TAU)
+				other.velocity += direction.normalized() + r * 0.5
+				handled.append(collider)
 	
 	if is_on_floor():
 		if _ground_frames == 0:

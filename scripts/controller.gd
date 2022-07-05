@@ -1,15 +1,21 @@
 extends Control
 
 
-enum SelectionState {
+enum SelectionMode {
 	VOXELS,
 	OBJECTS,
+	CHARACTERS,
+}
+
+enum CommandMode {
+	DIG,
+	BUILD,
 }
 
 var terrain: VoxelTerrain
 var voxel_tool: VoxelTool
 
-var selection_state := SelectionState.VOXELS
+var selection_mode := SelectionMode.VOXELS
 var selection: Array
 
 var _object_markers: Array
@@ -25,6 +31,10 @@ func _ready() -> void:
 		)
 	else:
 		printerr("HUD is not parented to a player")
+	
+	for button in get_tree().get_nodes_in_group("command_buttons"):
+		if button is Button:
+			(button as Button).pressed.connect(_on_button_pressed)
 
 
 func _input(event: InputEvent) -> void:
@@ -38,7 +48,7 @@ func _input(event: InputEvent) -> void:
 			if not Input.is_action_pressed("shift"):
 				clear_selection()
 			
-			select_object(p_result.collider)
+			select(p_result.collider)
 			
 			get_viewport().set_input_as_handled()
 			return
@@ -54,6 +64,22 @@ func _input(event: InputEvent) -> void:
 			return
 		
 		clear_selection()
+	elif event.is_action_released("secondary"):
+		if selection_mode == SelectionMode.CHARACTERS:
+			var v_result := voxel_cast()
+			
+			if v_result != null:
+				var pos := v_result.position + Vector3i(0, 1, 0)
+				
+				for c in selection:
+					if c is Character:
+						c.move_to(pos)
+				
+				get_viewport().set_input_as_handled()
+	
+	if event.is_action_pressed("space"):
+		get_tree().paused = not get_tree().paused
+		get_viewport().set_input_as_handled()
 
 
 func physics_cast(max_distance: float = 100.0) -> PhysicsRaycastResult:
@@ -74,17 +100,17 @@ func voxel_cast(max_distance: float = 100.0) -> VoxelRaycastResult:
 
 func is_currently_selectable(object) -> bool:
 	if selection.is_empty():
-		if object is Node:
-			selection_state = SelectionState.OBJECTS
-		elif object is Vector3i:
-			selection_state = SelectionState.VOXELS
+		if object is Vector3i:
+			selection_mode = SelectionMode.VOXELS
+		elif object is Character:
+			selection_mode = SelectionMode.CHARACTERS
 		else:
 			return false
 	
-	if selection_state == SelectionState.OBJECTS:
-		if object is Anthropoid:
+	if selection_mode == SelectionMode.CHARACTERS:
+		if object is Character:
 			return true
-	elif selection_state == SelectionState.VOXELS:
+	elif selection_mode == SelectionMode.VOXELS:
 		var pos := object as Vector3i
 		
 		if pos != null:
@@ -93,24 +119,31 @@ func is_currently_selectable(object) -> bool:
 	return false
 
 
-func select_object(object: Node) -> void:
-	selection.append(object)
+func select(object) -> bool:
+	if is_currently_selectable(object):
+		selection.append(object)
+		
+		if object is Character:
+			mark(object)
+		
+		return true
 	
+	return false
+
+
+func mark(character: Character) -> void:
 	var marker := _marker_scene.instantiate()
 	var pin := PinJoint3D.new()
 	
-	pin['nodes/node_a'] = object.get_path()
-	pin['nodes/node_b'] = marker.get_path()
-	
 	marker.add_child(pin)
-	object.add_child(marker)
+	character.add_child(marker)
+	
+	pin['nodes/node_a'] = character.get_path()
+	pin['nodes/node_b'] = marker.get_path()
 	
 	marker.transform.origin = Vector3(0, 1, 0)
 	
 	_object_markers.append(marker)
-	
-	print("Selected object")
-	print(object)
 
 
 func clear_selection() -> void:
@@ -121,3 +154,7 @@ func clear_selection() -> void:
 
 func get_camera() -> Camera3D:
 	return get_viewport().get_camera_3d()
+
+
+func _on_button_pressed() -> void:
+	print("Button pressed")
