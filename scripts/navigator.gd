@@ -2,8 +2,8 @@ class_name Navigator
 extends Resource
 
 
+var world: World
 var character: Character
-var voxel_tool: VoxelTool
 
 var _path: Array
 var _path_index: int
@@ -11,9 +11,10 @@ var _prev_check_msec: int
 var _prev_pos: Vector3
 
 
-func _init(character: Character, voxel_tool: VoxelTool) -> void:
+@warning_ignore(shadowed_variable)
+func _init(world: World, character: Character) -> void:
+	self.world = world
 	self.character = character
-	self.voxel_tool = voxel_tool
 
 
 func update() -> void:
@@ -97,14 +98,14 @@ func is_path_empty() -> bool:
 
 
 func _is_valid_floor(pos: Vector3i) -> bool:
-	var voxel_id := voxel_tool.get_voxel(pos)
+	var voxel_id := world.get_voxel(pos)
 	# TODO: Get these from configuration, i.e. voxels tagged with something
 	# that says they are a valid floor voxel
 	return voxel_id in [1]
 
 
 func _is_valid_air(pos: Vector3i) -> bool:
-	var voxel_id := voxel_tool.get_voxel(pos)
+	var voxel_id := world.get_voxel(pos)
 	# TODO: Get these from configuration
 	return voxel_id in [0]
 
@@ -234,7 +235,7 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		neighbors.shuffle()
 		
 		for n in neighbors:
-			if not voxel_tool.is_area_editable(AABB(n, Vector3.ONE)):
+			if not world.is_loaded(n):
 				continue
 			
 			if not clearance_fn.call(n) or not _is_traversal_clear(current, n):

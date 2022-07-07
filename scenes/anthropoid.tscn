@@ -14,6 +14,7 @@ height = 0.625
 size = Vector3(0.36, 0.9, 0.36)
 
 [node name="TestUnit" type="CharacterBody3D"]
+top_level = true
 script = ExtResource("1_1sju3")
 
 [node name="Mesh" type="Node3D" parent="."]

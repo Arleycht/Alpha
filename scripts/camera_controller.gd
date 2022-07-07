@@ -21,7 +21,6 @@ var target_y: int
 
 var _mouse_look_position: Vector2
 var _mouse_looking := false
-var _mouse_locked_position: Vector2
 
 
 func _ready() -> void:

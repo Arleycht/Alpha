@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ci4nkjs03khhm"
-path="res://.godot/imported/null.png-3bb5340b477c946a8ad18bd12847f76b.ctex"
+uid="uid://dddqdbcerosn6"
+path="res://.godot/imported/grass_bottom.png-5030ebed5c296795fe6800d16f79523e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/voxels/null.png"
-dest_files=["res://.godot/imported/null.png-3bb5340b477c946a8ad18bd12847f76b.ctex"]
+source_file="res://modules/core/textures/grass_bottom.png"
+dest_files=["res://.godot/imported/grass_bottom.png-5030ebed5c296795fe6800d16f79523e.ctex"]
 
 [params]
 
@@ -21,7 +21,7 @@ compress/hdr_compression=1
 compress/bptc_ldr=0
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -31,4 +31,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

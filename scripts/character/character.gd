@@ -4,6 +4,7 @@ extends CharacterBody3D
 
 signal jumped
 signal landed
+signal world_changed
 
 @export var max_speed := 3.0
 @export var jump_height := 1.0
@@ -13,35 +14,46 @@ signal landed
 @export var air_friction := 0.1
 @export var gravity_strength := 9.8
 @export var gravity_direction: Vector3 = Vector3.DOWN
-@export_node_path(VoxelTerrain) var terrain_path: NodePath
 
-var wish_vector := Vector3()
+var world: World:
+	set(value):
+		world = value
+		world_changed.emit(value)
+var wish_vector: Vector3
+var box_mover: VoxelBoxMover
 var navigator: Navigator
 
 var _ground_frames := 0
 var _jumping := false
 var _jump_buffered := false
 
-var _terrain: VoxelTerrain
-var _voxel_tool: VoxelTool
-
 
 func _ready() -> void:
-	_terrain = get_node(terrain_path) as VoxelTerrain
-	_voxel_tool = _terrain.get_voxel_tool() as VoxelTool
-	navigator = Navigator.new(self, _voxel_tool)
+	set_physics_process(false)
+	while world == null:
+		await world_changed
+	set_physics_process(true)
+	
+	box_mover = VoxelBoxMover.new()
+	navigator = Navigator.new(world, self)
 
 
 func _physics_process(delta: float) -> void:
+	if not world.is_position_loaded(position):
+		return
+	
 	wish_vector = Vector3()
 	navigator.update()
 	
 	velocity += gravity_direction * gravity_strength * delta
 	_update_movement(delta)
+	
+	
+	
 	var collided := move_and_slide()
 	
-	# Handle collisions with other characters
 	if collided:
+		# Handle collisions with other characters
 		var handled := []
 		
 		for i in get_slide_collision_count():

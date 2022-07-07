@@ -1,8 +1,9 @@
-[gd_scene load_steps=14 format=3 uid="uid://bgb3ilugbxjuf"]
+[gd_scene load_steps=9 format=3 uid="uid://du8lvs5pmhopk"]
 
-[ext_resource type="Material" path="res://materials/voxel_material.tres" id="1_8x1cd"]
-[ext_resource type="Script" path="res://scripts/environment_lighting.gd" id="2_dkxyg"]
+[ext_resource type="Script" path="res://scripts/environment_manager.gd" id="2_dkxyg"]
 [ext_resource type="PackedScene" uid="uid://cqyx6qlmpnfd5" path="res://scenes/anthropoid.tscn" id="2_euv34"]
+[ext_resource type="Script" path="res://scripts/daemon.gd" id="3_323pv"]
+[ext_resource type="Script" path="res://scripts/world.gd" id="3_snei3"]
 [ext_resource type="PackedScene" uid="uid://bys8uhw7yyiom" path="res://scenes/player.tscn" id="7_y4f0i"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
@@ -27,68 +28,27 @@ ssao_enabled = true
 ssil_enabled = true
 fog_density = 0.0165
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_5wujt"]
-
-[sub_resource type="VoxelGeneratorNoise2D" id="VoxelGeneratorNoise2D_d0vow"]
-channel = 0
-height_start = -25.0
-height_range = 50.0
-noise = SubResource("FastNoiseLite_5wujt")
-
-[sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_nfkcm"]
-voxel_name = &"air"
-
-[sub_resource type="VoxelBlockyModel" id="VoxelBlockyModel_jy8j4"]
-voxel_name = &"dirt"
-geometry_type = 1
-collision_aabbs = [AABB(0, 0, 0, 1, 1, 1)]
-cube_geometry_padding_y = null
-cube_tiles_left = Vector2(0, 0)
-cube_tiles_right = Vector2(0, 0)
-cube_tiles_bottom = Vector2(0, 0)
-cube_tiles_top = Vector2(0, 0)
-cube_tiles_back = Vector2(0, 0)
-cube_tiles_front = Vector2(0, 0)
-collision_enabled_0 = true
-
-[sub_resource type="VoxelBlockyLibrary" id="VoxelBlockyLibrary_fy42j"]
-atlas_size = 1
-voxels/0 = SubResource("VoxelBlockyModel_nfkcm")
-voxels/1 = SubResource("VoxelBlockyModel_jy8j4")
-
-[sub_resource type="VoxelMesherBlocky" id="VoxelMesherBlocky_7qrfx"]
-library = SubResource("VoxelBlockyLibrary_fy42j")
-
 [node name="World" type="Node3D"]
+script = ExtResource("3_snei3")
 
-[node name="Environment" type="Node3D" parent="."]
-script = ExtResource("2_dkxyg")
-environment_path = NodePath("WorldEnvironment")
-sun_path = NodePath("Sun")
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_svm8j")
+script = ExtResource("2_dkxyg")
 
-[node name="Sun" type="DirectionalLight3D" parent="Environment"]
+[node name="Sun" type="DirectionalLight3D" parent="WorldEnvironment"]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
 shadow_enabled = true
 shadow_reverse_cull_face = true
 
-[node name="VoxelTerrain" type="VoxelTerrain" parent="."]
-generator = SubResource("VoxelGeneratorNoise2D_d0vow")
-mesher = SubResource("VoxelMesherBlocky_7qrfx")
-gi_mode = 2
-material_override = ExtResource("1_8x1cd")
-
-[node name="TestUnit" parent="." instance=ExtResource("2_euv34")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0.5)
-terrain_path = NodePath("../VoxelTerrain")
-
-[node name="TestUnit2" parent="." instance=ExtResource("2_euv34")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 1.5)
-terrain_path = NodePath("../VoxelTerrain")
-
 [node name="Player" parent="." instance=ExtResource("7_y4f0i")]
 process_mode = 3
 transform = Transform3D(-1, 4.37114e-08, -7.57103e-08, 0, 0.866025, 0.5, 8.74228e-08, 0.5, -0.866025, 0, 4, -5)
-terrain_path = NodePath("../VoxelTerrain")
+
+[node name="Daemon" type="Node3D" parent="."]
+script = ExtResource("3_323pv")
+
+[node name="One" parent="." instance=ExtResource("2_euv34")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0.5)
+
+[node name="Two" parent="." instance=ExtResource("2_euv34")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1, 1.5)

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cjytjwyal0csw"
-path="res://.godot/imported/dirt.png-e3d307ed2a5e57cb8463b1d9d86fb5a4.ctex"
+uid="uid://cekrtb7jeha82"
+path="res://.godot/imported/grass_top.png-0a7f36f6babdff9527d0f997a9539659.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/voxels/dirt.png"
-dest_files=["res://.godot/imported/dirt.png-e3d307ed2a5e57cb8463b1d9d86fb5a4.ctex"]
+source_file="res://modules/core/textures/grass_top.png"
+dest_files=["res://.godot/imported/grass_top.png-0a7f36f6babdff9527d0f997a9539659.ctex"]
 
 [params]
 
@@ -21,7 +21,7 @@ compress/hdr_compression=1
 compress/bptc_ldr=0
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -31,4 +31,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

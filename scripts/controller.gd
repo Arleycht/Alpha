@@ -1,22 +1,27 @@
 extends Control
 
 
+enum ControlMode {
+	SELECT,
+	DIG,
+	BUILD,
+}
+
 enum SelectionMode {
 	VOXELS,
 	OBJECTS,
 	CHARACTERS,
 }
 
-enum CommandMode {
-	DIG,
-	BUILD,
-}
+const TIME_SCALE_MAX := 3
 
-var terrain: VoxelTerrain
-var voxel_tool: VoxelTool
+var player: Player
 
+var control_mode := ControlMode.SELECT
 var selection_mode := SelectionMode.VOXELS
 var selection: Array
+
+var time_scale := 1
 
 var _object_markers: Array
 var _marker_scene := preload("res://scenes/marker.tscn")
@@ -24,11 +29,7 @@ var _marker_scene := preload("res://scenes/marker.tscn")
 
 func _ready() -> void:
 	if get_parent() is Player:
-		var player := get_parent() as Player
-		player.terrain_loaded.connect(func(t, vt):
-			terrain = t
-			voxel_tool = vt
-		)
+		player = get_parent()
 	else:
 		printerr("HUD is not parented to a player")
 	
@@ -38,32 +39,12 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if terrain == null or voxel_tool == null:
+	if player.world == null:
 		return
 	
 	if event.is_action_pressed("primary"):
-		var p_result := physics_cast()
-		
-		if p_result != null and is_currently_selectable(p_result.collider):
-			if not Input.is_action_pressed("shift"):
-				clear_selection()
-			
-			select(p_result.collider)
-			
-			get_viewport().set_input_as_handled()
-			return
-		
-		var v_result := voxel_cast()
-		
-		if v_result != null and is_currently_selectable(v_result.position):
-			for object in selection:
-				if object is Anthropoid:
-					object.move_to(v_result.position + Vector3i(0, 1, 0))
-			
-			get_viewport().set_input_as_handled()
-			return
-		
-		clear_selection()
+		if control_mode == ControlMode.SELECT:
+			select()
 	elif event.is_action_released("secondary"):
 		if selection_mode == SelectionMode.CHARACTERS:
 			var v_result := voxel_cast()
@@ -95,7 +76,7 @@ func voxel_cast(max_distance: float = 100.0) -> VoxelRaycastResult:
 	var mouse_pos := get_viewport().get_mouse_position()
 	var origin := camera.project_ray_origin(mouse_pos)
 	var direction := camera.project_ray_normal(mouse_pos)
-	return Common.voxel_cast(voxel_tool, origin, direction * max_distance)
+	return Common.voxel_cast(player.world, origin, direction * max_distance)
 
 
 func is_currently_selectable(object) -> bool:
@@ -111,27 +92,42 @@ func is_currently_selectable(object) -> bool:
 		if object is Character:
 			return true
 	elif selection_mode == SelectionMode.VOXELS:
-		var pos := object as Vector3i
-		
-		if pos != null:
-			return voxel_tool.get_voxel(pos) in [1]
+		if object is Vector3i:
+			return player.world.get_voxel(object) in [1]
 	
 	return false
 
 
-func select(object) -> bool:
-	if is_currently_selectable(object):
-		selection.append(object)
+func select() -> bool:
+	var selected
+	
+	var p_result := physics_cast()
+	if p_result != null and is_currently_selectable(p_result.collider):
+		selected = p_result.collider
+	else:
+		var v_result := voxel_cast()
+		if v_result != null and is_currently_selectable(v_result.position):
+			selected = v_result.position
+	
+	if selected != null:
+		if not Input.is_action_pressed("shift"):
+			clear_selection()
 		
-		if object is Character:
-			mark(object)
+		if not selected in selection:
+			selection.append(selected)
+			
+			if selected is Character:
+				_mark(selected)
 		
+		get_viewport().set_input_as_handled()
 		return true
+	else:
+		clear_selection()
 	
 	return false
 
 
-func mark(character: Character) -> void:
+func _mark(character: Character) -> void:
 	var marker := _marker_scene.instantiate()
 	var pin := PinJoint3D.new()
 	

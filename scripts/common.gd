@@ -1,6 +1,14 @@
 class_name Common
 
 
+enum Directions {
+	WEST = 0, NORTH, EAST, SOUTH, UP, DOWN,
+	POS_X = WEST, NEG_X = EAST,
+	POS_Y = UP, NEG_Y = DOWN,
+	POS_Z = NORTH, NEG_Z = SOUTH,
+}
+
+
 static func to_voxel_coords(v: Vector3) -> Vector3i:
 	return Vector3i(v.floor())
 
@@ -30,5 +38,5 @@ static func physics_cast(camera: Camera3D, origin: Vector3, to: Vector3) -> Phys
 	return result
 
 
-static func voxel_cast(voxel_tool: VoxelTool, origin: Vector3, to: Vector3) -> VoxelRaycastResult:
-	return voxel_tool.raycast(origin, to.normalized(), to.length())
+static func voxel_cast(world: World, origin: Vector3, to: Vector3) -> VoxelRaycastResult:
+	return world.tool.raycast(origin, to.normalized(), to.length())

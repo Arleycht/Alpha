@@ -1,22 +1,25 @@
-extends Node3D
+class_name EnvironmentManager
+extends WorldEnvironment
 
+
+signal time_changed
 
 @export var angle := 70.0
-@export var time := 7.0
+@export var time := 7.0:
+	set(value):
+		time_changed.emit(value)
 @export var time_scale := 1.0 / 60.0
 @export_node_path(WorldEnvironment) var environment_path
-@export_node_path(DirectionalLight3D) var sun_path
 
-var _environment: WorldEnvironment
 var _sun: DirectionalLight3D
 
 
 func _ready() -> void:
-	_environment = get_node(environment_path) as WorldEnvironment
-	_sun = get_node(sun_path) as DirectionalLight3D
+	_sun = get_node("Sun") as DirectionalLight3D
+	time_changed.connect(_update)
 
 
-func _physics_process(delta: float) -> void:
+func _update(delta: float) -> void:
 	var t := time * PI / 12
 	
 	_sun.transform.basis = Basis.from_euler(Vector3(deg2rad(angle), t, 0), Basis.EULER_ORDER_XYZ)
