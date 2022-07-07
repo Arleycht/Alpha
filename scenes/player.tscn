@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://70g42gr6aelk" path="res://palettes/bw.png" id="2_og2vy"]
 [ext_resource type="Script" path="res://scripts/controller.gd" id="2_so2xf"]
 [ext_resource type="Shader" path="res://shaders/pixelate.gdshader" id="3_gtbil"]
-[ext_resource type="Theme" uid="uid://bermik5vhjxph" path="res://themes/default.tres" id="3_nyme8"]
+[ext_resource type="Theme" uid="uid://by1kcdusj80r5" path="res://themes/default.tres" id="3_nyme8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fsif1"]
 shader = ExtResource("1_k0fqw")
