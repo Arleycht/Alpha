@@ -29,12 +29,7 @@ func _load() -> void:
 	var atlas_map := {}
 	var default_mesh = load(DEFAULT_MESH_PATH)
 	
-	# TODO:
-	# All this code will be scrapped to instead perform the following:
-	#
-	# Textures will all be stitched to an atlas and an atlas_map will contain
-	# mappings from texture paths to metadata concerning their position and size
-	# in the atlas so that UVs can be mapped to the texture atlas
+	# Generate atlas map
 	
 	for module_name in modules.keys():
 		for i in modules[module_name]['definitions'].size():
@@ -42,8 +37,8 @@ func _load() -> void:
 			var texture_paths: Dictionary = def['textures']
 			
 			for file_name in texture_paths.values():
-				var texture_id := "%s/%s" % [module_name, file_name]
 				var path := _get_texture_path(module_name, file_name)
+				var texture_id := "%s/%s" % [module_name, path.get_file()]
 				var image := _load_image(path)
 				atlas_map[texture_id] = {
 					'image': image,
@@ -53,20 +48,68 @@ func _load() -> void:
 	# Stitch textures
 	
 	var size := _pack_atlas(atlas_map)
-	
 	var atlas_image := Image.new()
 	atlas_image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
 	
 	for texture_id in atlas_map:
 		var img := atlas_map[texture_id]['image'] as Image
-		var src_rect := Rect2(Vector2(), img.get_size())
+		var src_rect := Rect2i(Vector2(), img.get_size())
 		var dst := atlas_map[texture_id]['rect'].position as Vector2i
 		atlas_image.blit_rect(atlas_map[texture_id]['image'], src_rect, dst)
 	
 	var atlas_texture := ImageTexture.new()
 	atlas_texture.create_from_image(atlas_image)
 	
+	# Generate meshes
+	
+	
+	
 	library.bake()
+
+
+func _pack_atlas(atlas_map: Dictionary) -> Vector2i:
+	var images := atlas_map.values()
+	var size := Vector2i()
+	var max_rect := Rect2i()
+	
+	# Sort by height
+	images.sort_custom(func(a, b):
+		return a['rect'].size.y > b['rect'].size.y
+	)
+	
+	for data in images:
+		var rect: Rect2i = data['rect']
+		size.x += rect.size.x
+		size.y = max(size.y, rect.size.y)
+		
+		if rect.size.x > max_rect.size.x or rect.size.y > max_rect.size.y:
+			max_rect = rect
+	
+	# Arbitrarily choose a maximum width to pack into
+	# Optimally should be close to a square, hence half the total combined width
+	var max_width: int = max(size.x / 2, max_rect.size.x)
+	var pos := Vector2i()
+	
+	size.x = 0
+	size.y = 0
+	
+	for data in images:
+		var rect: Rect2i = data['rect']
+		
+		size.y = max(size.y, rect.size.y)
+		
+		if pos.x + rect.size.x > max_width:
+			pos.x = 0
+			pos.y = size.y
+		
+		rect.position = pos
+		pos.x += rect.size.x
+		size.x = max(size.x, rect.position.x + rect.size.x)
+		size.y = max(size.y, rect.position.y + rect.size.y)
+		
+		data['rect'] = rect
+	
+	return size
 
 
 func _load_modules() -> Dictionary:
@@ -117,7 +160,12 @@ func _load_definition_file(file_path: String) -> Dictionary:
 
 
 func _get_texture_path(module_name: String, file_name: String) -> String:
-	return "res://modules/%s/textures/%s" % [module_name, file_name]
+	var path := "res://modules/%s/textures/%s" % [module_name, file_name]
+	
+	if File.file_exists(path):
+		return path
+	
+	return DEFAULT_TEXTURE_PATH
 
 
 func _load_image(path: String) -> Image:
@@ -132,31 +180,16 @@ func _load_image(path: String) -> Image:
 	return img
 
 
-func _pack_atlas(atlas_map: Dictionary) -> Vector2i:
-	var min_pos := Vector2i()
-	var max_pos := Vector2i()
-	
-	# TODO: Use a more optimal rectangle packing strategy
-	# Maps to a straight line, suboptimal if rectangles differ in size
-	var x := 0
-	for k in atlas_map:
-		var data: Dictionary = atlas_map[k]
-		var rect := data['rect'] as Rect2i
-		rect.position.x = x
-		x += rect.size.x
-		
-		atlas_map[k]['rect'] = rect
-		min_pos.x = min(min_pos.x, rect.position.x)
-		min_pos.y = min(min_pos.y, rect.position.y)
-		max_pos.x = max(max_pos.x, rect.position.x + rect.size.x)
-		max_pos.y = max(max_pos.y, rect.position.y + rect.size.y)
-	
-	return max_pos - min_pos
-
-
 func _build_cube_mesh(p: float = 0.0, q: float = 1.0 / 6.0) -> ArrayMesh:
 	var tool := MeshDataTool.new()
 	var mesh := ArrayMesh.new()
+	
+	var array := []
+	array.resize(Mesh.ARRAY_MAX)
+	
+	array[Mesh.ARRAY_VERTEX] = []
+	
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, array)
 	
 	tool.commit_to_surface(mesh)
 	return mesh
