@@ -1,14 +1,6 @@
 class_name Common
 
 
-enum Directions {
-	WEST = 0, NORTH, EAST, SOUTH, UP, DOWN,
-	POS_X = WEST, NEG_X = EAST,
-	POS_Y = UP, NEG_Y = DOWN,
-	POS_Z = NORTH, NEG_Z = SOUTH,
-}
-
-
 static func to_voxel_coords(v: Vector3) -> Vector3i:
 	return Vector3i(v.floor())
 

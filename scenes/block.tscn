@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://c0414vqyb70ir"]
+
+[sub_resource type="GDScript" id="GDScript_ke5ly"]
+script/source = "class_name Block
+extends Node3D
+
+
+var buffer: VoxelBuffer
+var mesh: Mesh
+
+@onready var _mesh_instance: MeshInstance3D = $\"MeshInstance3D\"
+@onready var _collision: CollisionShape3D = $\"CollisionShape3D\"
+
+
+func _init() -> void:
+	buffer = VoxelBuffer.new()
+	mesh = ArrayMesh.new()
+
+
+func create(position: Vector3, block_size: int) -> void:
+	transform.origin = position
+	buffer.create(block_size + 2, block_size + 2, block_size + 2)
+
+
+func update_mesh() -> void:
+	if mesh != null:
+		_mesh_instance.mesh = mesh
+		_collision.shape = mesh.create_trimesh_shape()
+	else:
+		clear_mesh()
+
+
+func clear_mesh() -> void:
+	mesh = ArrayMesh.new()
+	_mesh_instance.mesh = mesh
+	_collision.shape = Shape3D.new()
+"
+
+[node name="Block" type="Node3D"]
+top_level = true
+script = SubResource("GDScript_ke5ly")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
