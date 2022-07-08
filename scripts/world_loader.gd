@@ -19,7 +19,12 @@ func _load() -> void:
 	library = VoxelBlockyLibrary.new()
 	
 	var modules := _load_modules()
-	var voxel_names := {}
+	var module_names := modules.keys()
+	module_names.sort_custom(func(a, b):
+		return a['load_order'] < b['load_order']
+	)
+	
+	var voxel_definitions := {}
 	var voxels := [
 		{
 			'name': "empty",
@@ -31,10 +36,17 @@ func _load() -> void:
 	
 	# Generate atlas map
 	
-	for module_name in modules.keys():
+	for module_name in module_names:
 		for i in modules[module_name]['definitions'].size():
 			var def: Dictionary = modules[module_name]['definitions'][i]
+			var voxel_id := "%s:%s" % [module_name, def['name'] as String]
 			var texture_paths: Dictionary = def['textures']
+			
+			if voxel_id in voxel_definitions:
+				printerr("Skipping duplicated voxel at \"%s\"" % voxel_id)
+				continue
+			else:
+				voxel_definitions[voxel_id] = def
 			
 			for file_name in texture_paths.values():
 				var path := _get_texture_path(module_name, file_name)
@@ -120,10 +132,18 @@ func _load_modules() -> Dictionary:
 	
 	for module_name in dir.get_directories():
 		var sub_dir := Directory.new()
+		var load_order := 0
+		var config := ConfigFile.new()
 		var definitions := []
 		
 		sub_dir.change_dir(dir.get_current_dir())
-		sub_dir.change_dir(module_name + "/definitions")
+		sub_dir.change_dir(module_name)
+		
+		if sub_dir.file_exists("module"):
+			config.load(sub_dir.get_current_dir() + "/module")
+			load_order = config.get_section_key("load", "load_order", 1) as int
+		
+		sub_dir.change_dir("definitions")
 		
 		for def_name in sub_dir.get_files():
 			if def_name.to_lower().ends_with(".json"):
@@ -134,6 +154,8 @@ func _load_modules() -> Dictionary:
 					definitions.append(def)
 		
 		modules[module_name] = {
+			"load_order": load_order,
+			'config': config,
 			'definitions': definitions,
 		}
 	
