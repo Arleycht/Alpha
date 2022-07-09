@@ -79,7 +79,7 @@ func voxel_cast(max_distance: float = 100.0) -> VoxelRaycastResult:
 	return Common.voxel_cast(player.world, origin, direction * max_distance)
 
 
-func is_currently_selectable(object) -> bool:
+func is_selectable(object) -> bool:
 	if selection.is_empty():
 		if object is Vector3i:
 			selection_mode = SelectionMode.VOXELS
@@ -89,7 +89,7 @@ func is_currently_selectable(object) -> bool:
 			return false
 	
 	if selection_mode == SelectionMode.CHARACTERS:
-		if object is Character:
+		if object is Character and object.is_physics_processing():
 			return true
 	elif selection_mode == SelectionMode.VOXELS:
 		if object is Vector3i:
@@ -102,11 +102,11 @@ func select() -> bool:
 	var selected
 	
 	var p_result := physics_cast()
-	if p_result != null and is_currently_selectable(p_result.collider):
+	if p_result != null and is_selectable(p_result.collider):
 		selected = p_result.collider
 	else:
 		var v_result := voxel_cast()
-		if v_result != null and is_currently_selectable(v_result.position):
+		if v_result != null and is_selectable(v_result.position):
 			selected = v_result.position
 	
 	if selected != null:

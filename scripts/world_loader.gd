@@ -2,6 +2,7 @@ class_name WorldLoader
 extends Object
 
 
+const MODULES_PATH := "user://modules"
 const DEFAULT_TEXTURE_PATH := "res://modules/core/textures/null.png"
 const DEFAULT_TEXTURE_ID := "core/null.png"
 
@@ -29,6 +30,7 @@ func _load() -> void:
 	
 	for module_name in module_names:
 		for i in modules[module_name]['definitions'].size():
+			var module_path: String = modules[module_name]['path']
 			var def: Dictionary = modules[module_name]['definitions'][i]
 			var voxel_id := "%s:%s" % [module_name, def['name']]
 			
@@ -40,12 +42,14 @@ func _load() -> void:
 			
 			for side in def['textures']:
 				var file_name: String = def['textures'][side]
-				var path := "res://modules/%s/textures/%s" % [module_name, file_name]
+				var path := "%s/textures/%s" % [module_path, file_name]
 				var texture_id: String
 				
 				if File.file_exists(path):
+					print("Loaded \"%s\"" % path)
 					texture_id = "%s/%s" % [module_name, path.get_file()]
 				else:
+					printerr("Failed to find \"%s\"" % path)
 					path = DEFAULT_TEXTURE_PATH
 					texture_id = DEFAULT_TEXTURE_ID
 				
@@ -60,6 +64,8 @@ func _load() -> void:
 	
 	var size := _pack_atlas(atlas_map)
 	var atlas_image := Image.new()
+	var atlas_texture: ImageTexture
+	
 	atlas_image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
 	
 	for texture_id in atlas_map:
@@ -68,10 +74,7 @@ func _load() -> void:
 		var dst := atlas_map[texture_id]['rect'].position as Vector2i
 		atlas_image.blit_rect(atlas_map[texture_id]['image'], src_rect, dst)
 	
-	var atlas_texture := ImageTexture.new()
-	atlas_texture.create_from_image(atlas_image)
-	
-	atlas_image.save_png("res://.temp/test.png")
+	atlas_texture = ImageTexture.create_from_image(atlas_image)
 	
 	# Create material
 	
@@ -79,8 +82,6 @@ func _load() -> void:
 	default_material.albedo_texture = atlas_texture
 	default_material.vertex_color_use_as_albedo = true
 	default_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	
-	# Generate meshes
 	
 	# Create library
 	
@@ -155,34 +156,40 @@ func _pack_atlas(atlas_map: Dictionary, padding: int = 2) -> Vector2i:
 func _load_modules() -> Dictionary:
 	var modules := {}
 	
+	var module_paths := ["res://modules/core"]
 	var dir := Directory.new()
-	dir.change_dir("res://modules/")
 	
-	for module_name in dir.get_directories():
-		var sub_dir := Directory.new()
+	if dir.open(MODULES_PATH) == OK:
+		for module_name in dir.get_directories():
+			module_paths.append(dir.get_current_dir() + "/" + module_name)
+	
+	for module_path in module_paths:
+		var module_name := module_path.split('/')[-1]
 		var load_order := 0
 		var config := ConfigFile.new()
 		var definitions := []
 		
-		sub_dir.change_dir(dir.get_current_dir())
-		sub_dir.change_dir(module_name)
+		if dir.open(module_path) != OK:
+			printerr("Failed to load module at \"%s\"" % module_path)
+			continue
 		
-		if sub_dir.file_exists("module"):
-			config.load(sub_dir.get_current_dir() + "/module")
+		if dir.file_exists("module"):
+			config.load(dir.get_current_dir() + "/module")
 			load_order = config.get_section_key("load", "load_order", 1) as int
 		
-		sub_dir.change_dir("definitions")
+		dir.change_dir("definitions")
 		
-		for def_name in sub_dir.get_files():
+		for def_name in dir.get_files():
 			if def_name.to_lower().ends_with(".json"):
-				var def_path := sub_dir.get_current_dir() + "/%s" % def_name
+				var def_path := dir.get_current_dir() + "/%s" % def_name
 				var def := _load_definition_file(def_path)
 				
 				if not def.is_empty():
 					definitions.append(def)
 		
 		modules[module_name] = {
-			"load_order": load_order,
+			'path': module_path,
+			'load_order': load_order,
 			'config': config,
 			'definitions': definitions,
 		}
@@ -211,8 +218,16 @@ func _load_definition_file(file_path: String) -> Dictionary:
 
 func _load_image(path: String) -> Image:
 	var img := Image.new()
-	var texture := ImageTexture.new()
-	img.load(path)
+	
+	if path.begins_with("res://"):
+		var t: Variant = load(path)
+		
+		if t is Texture2D:
+			img = t.get_image()
+		else:
+			img.load(DEFAULT_TEXTURE_PATH)
+	else:
+		img.load(path)
 	img.convert(Image.FORMAT_RGBA8)
 	
 	return img

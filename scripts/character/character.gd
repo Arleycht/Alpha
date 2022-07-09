@@ -4,7 +4,6 @@ extends CharacterBody3D
 
 signal jumped
 signal landed
-signal world_changed
 
 @export var max_speed := 3.0
 @export var jump_height := 1.0
@@ -15,10 +14,7 @@ signal world_changed
 @export var gravity_strength := 9.8
 @export var gravity_direction: Vector3 = Vector3.DOWN
 
-var world: World:
-	set(value):
-		world = value
-		world_changed.emit(value)
+var world: World
 var wish_vector: Vector3
 var box_mover: VoxelBoxMover
 var navigator: Navigator
@@ -29,17 +25,23 @@ var _jump_buffered := false
 
 
 func _ready() -> void:
-	set_physics_process(false)
-	while world == null:
-		await world_changed
-	set_physics_process(true)
-	
 	box_mover = VoxelBoxMover.new()
-	navigator = Navigator.new(world, self)
+	navigator = Navigator.new(self)
 
 
 func _physics_process(delta: float) -> void:
-	if not world.is_position_loaded(position):
+	if world == null:
+		var p = get_parent()
+		
+		while p != null:
+			if p is World:
+				world = p
+				break
+			
+			p = get_parent()
+		
+		return
+	elif not world.is_position_loaded(position):
 		return
 	
 	wish_vector = Vector3()
@@ -47,8 +49,6 @@ func _physics_process(delta: float) -> void:
 	
 	velocity += gravity_direction * gravity_strength * delta
 	_update_movement(delta)
-	
-	
 	
 	var collided := move_and_slide()
 	

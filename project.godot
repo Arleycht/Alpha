@@ -14,11 +14,6 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/character/anthropoid.gd"
 }, {
-"base": "RefCounted",
-"class": &"Block",
-"language": &"GDScript",
-"path": "res://scripts/block.gd"
-}, {
 "base": "Node3D",
 "class": &"CameraController",
 "language": &"GDScript",
@@ -76,7 +71,6 @@ _global_script_classes=[{
 }]
 _global_script_class_icons={
 "Anthropoid": "",
-"Block": "",
 "CameraController": "",
 "Character": "",
 "Common": "",
