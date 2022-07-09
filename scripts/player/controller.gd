@@ -139,14 +139,8 @@ func get_camera() -> Camera3D:
 
 func _mark(character: Character) -> void:
 	var marker := _marker_scene.instantiate()
-	var pin := PinJoint3D.new()
 	
-	marker.add_child(pin)
 	character.add_child(marker)
-	
-	pin['nodes/node_a'] = character.get_path()
-	pin['nodes/node_b'] = marker.get_path()
-	
 	marker.transform.origin = Vector3(0, 1, 0)
 	
 	_object_markers.append(marker)
