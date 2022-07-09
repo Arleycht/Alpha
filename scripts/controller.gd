@@ -127,6 +127,16 @@ func select() -> bool:
 	return false
 
 
+func clear_selection() -> void:
+	selection.clear()
+	_object_markers.map(func(x: Node): x.queue_free())
+	_object_markers.clear()
+
+
+func get_camera() -> Camera3D:
+	return get_viewport().get_camera_3d()
+
+
 func _mark(character: Character) -> void:
 	var marker := _marker_scene.instantiate()
 	var pin := PinJoint3D.new()
@@ -140,16 +150,6 @@ func _mark(character: Character) -> void:
 	marker.transform.origin = Vector3(0, 1, 0)
 	
 	_object_markers.append(marker)
-
-
-func clear_selection() -> void:
-	selection.clear()
-	_object_markers.map(func(x: Node): x.queue_free())
-	_object_markers.clear()
-
-
-func get_camera() -> Camera3D:
-	return get_viewport().get_camera_3d()
 
 
 func _on_button_pressed() -> void:
