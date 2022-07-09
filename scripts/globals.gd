@@ -1,12 +1,17 @@
-class_name Common
+extends Node3D
+
+# Initialization constants
+
+const BLOCK_SIZE := 16
+const MODULES_PATH := "user://modules"
+const CORE_MODULE_PATH := "res://modules/core"
+const DEFAULT_TEXTURE_PATH := "res://modules/core/textures/null.png"
+const DEFAULT_TEXTURE_ID := "core/null.png"
 
 
-static func to_voxel_coords(v: Vector3) -> Vector3i:
+## Returns the vector aligned to coordinates
+static func align_vector(v: Vector3) -> Vector3i:
 	return Vector3i(v.floor())
-
-
-static func to_real_coords(v: Vector3i) -> Vector3:
-	return Vector3(v) + Vector3(0.5, 0.5, 0.5)
 
 
 static func physics_cast(camera: Camera3D, origin: Vector3, to: Vector3) -> PhysicsRaycastResult:

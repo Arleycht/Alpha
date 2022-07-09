@@ -18,6 +18,7 @@ var _loaded_blocks := {}
 
 func _ready() -> void:
 	_loader = WorldLoader.new()
+	_stream = VoxelStreamSQLite.new()
 	
 	# Test generator
 	var generator := VoxelGeneratorNoise2D.new()
@@ -41,28 +42,10 @@ func _ready() -> void:
 	add_child(terrain)
 	move_child(terrain, 0)
 	
-	terrain.block_loaded.connect(func(bpos: Vector3i):
-#		print("Loaded %s" % bpos)
-		_loaded_blocks[bpos] = false
-	)
-	
-	terrain.block_unloaded.connect(func(bpos: Vector3i):
-#		print("Unloaded %s" % bpos)
-		_loaded_blocks.erase(bpos)
-	)
-	
-	terrain.mesh_block_loaded.connect(func(bpos: Vector3i):
-#		print("Meshed %s" % bpos)
-		_loaded_blocks[bpos] = true
-		mesh_changed.emit()
-	)
-	
-	terrain.mesh_block_unloaded.connect(func(bpos: Vector3i):
-#		print("Unmeshed %s" % bpos)
-		if bpos in _loaded_blocks:
-			_loaded_blocks[bpos] = false
-		mesh_changed.emit()
-	)
+	terrain.block_loaded.connect(_on_block_loaded)
+	terrain.block_unloaded.connect(_on_block_unloaded)
+	terrain.mesh_block_loaded.connect(_on_mesh_block_loaded)
+	terrain.mesh_block_unloaded.connect(_on_mesh_block_unloaded)
 
 
 func _physics_process(delta: float) -> void:
@@ -97,7 +80,7 @@ func is_aabb_uniform(aabb: AABB, id: int) -> bool:
 
 
 func is_position_loaded(pos: Vector3) -> bool:
-	var bpos := to_block_coords(pos)
+	var bpos := Globals.align_vector(pos)
 	
 	if bpos in _loaded_blocks:
 		if _loaded_blocks[bpos]:
@@ -105,7 +88,8 @@ func is_position_loaded(pos: Vector3) -> bool:
 			return true
 		
 		# Empty locations are technically always loaded
-		return is_aabb_uniform(AABB(to_voxel_coords(bpos), Vector3.ONE * get_block_size()), 0)
+		var aabb := AABB(bpos * Globals.BLOCK_SIZE, Vector3.ONE * Globals.BLOCK_SIZE)
+		return is_aabb_uniform(aabb, 0)
 	
 	return false
 
@@ -114,9 +98,23 @@ func get_block_size() -> int:
 	return terrain.get_data_block_size()
 
 
-func to_block_coords(v: Vector3) -> Vector3i:
-	return Vector3i((v / get_block_size()).floor())
+func _deferred_mesh_update(bpos: Vector3i, loaded: bool) -> void:
+	if bpos in _loaded_blocks:
+		_loaded_blocks[bpos] = loaded
 
 
-func to_voxel_coords(v: Vector3i) -> Vector3:
-	return Vector3(v * terrain.get_data_block_size())
+func _on_block_loaded(bpos: Vector3i) -> void:
+	if bpos not in _loaded_blocks:
+		_loaded_blocks[bpos] = false
+
+
+func _on_block_unloaded(bpos: Vector3i) -> void:
+	_loaded_blocks.erase(bpos)
+
+
+func _on_mesh_block_loaded(bpos: Vector3i) -> void:
+	call_deferred("_deferred_mesh_update", bpos, true)
+
+
+func _on_mesh_block_unloaded(bpos: Vector3i) -> void:
+	call_deferred("_deferred_mesh_update", bpos, false)

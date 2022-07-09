@@ -1,10 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://bys8uhw7yyiom"]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/camera_controller.gd" id="1_eddrl"]
-[ext_resource type="Script" path="res://scripts/player.gd" id="1_efpoh"]
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_efpoh"]
 [ext_resource type="Shader" path="res://shaders/palette.gdshader" id="1_k0fqw"]
 [ext_resource type="Texture2D" uid="uid://70g42gr6aelk" path="res://palettes/bw.png" id="2_og2vy"]
-[ext_resource type="Script" path="res://scripts/controller.gd" id="2_so2xf"]
+[ext_resource type="Script" path="res://scripts/player/controller.gd" id="2_so2xf"]
 [ext_resource type="Shader" path="res://shaders/pixelate.gdshader" id="3_gtbil"]
 [ext_resource type="Theme" uid="uid://by1kcdusj80r5" path="res://themes/default.tres" id="3_nyme8"]
 

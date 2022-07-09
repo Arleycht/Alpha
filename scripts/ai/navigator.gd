@@ -63,8 +63,8 @@ func update() -> void:
 
 
 func move_to(from: Vector3, to: Vector3) -> void:
-	var from_i := Common.to_voxel_coords(from)
-	var to_i := Common.to_voxel_coords(to)
+	var from_i := Globals.align_vector(from)
+	var to_i := Globals.align_vector(to)
 	_pathfind(from_i, to_i)
 
 
@@ -72,7 +72,7 @@ func get_position() -> Vector3:
 	if is_path_empty():
 		return Vector3.ZERO
 	
-	return Common.to_real_coords(_path[_path_index]) - Vector3(0, 0.5, 0)
+	return Vector3(_path[_path_index]) + Vector3(0.5, 0, 0.5)
 
 
 func increment_position() -> void:

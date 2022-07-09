@@ -68,7 +68,7 @@ func physics_cast(max_distance: float = 100.0) -> PhysicsRaycastResult:
 	var mouse_pos := get_viewport().get_mouse_position()
 	var origin := camera.project_ray_origin(mouse_pos)
 	var direction := camera.project_ray_normal(mouse_pos)
-	return Common.physics_cast(camera, origin, direction * max_distance)
+	return Globals.physics_cast(camera, origin, direction * max_distance)
 
 
 func voxel_cast(max_distance: float = 100.0) -> VoxelRaycastResult:
@@ -76,7 +76,7 @@ func voxel_cast(max_distance: float = 100.0) -> VoxelRaycastResult:
 	var mouse_pos := get_viewport().get_mouse_position()
 	var origin := camera.project_ray_origin(mouse_pos)
 	var direction := camera.project_ray_normal(mouse_pos)
-	return Common.voxel_cast(player.world, origin, direction * max_distance)
+	return Globals.voxel_cast(player.world, origin, direction * max_distance)
 
 
 func is_selectable(object) -> bool:

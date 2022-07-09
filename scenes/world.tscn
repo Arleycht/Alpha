@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cqyx6qlmpnfd5" path="res://scenes/anthropoid.tscn" id="2_euv34"]
 [ext_resource type="Script" path="res://scripts/daemon.gd" id="3_323pv"]
 [ext_resource type="Script" path="res://scripts/world.gd" id="3_snei3"]
-[ext_resource type="PackedScene" uid="uid://bys8uhw7yyiom" path="res://scenes/player.tscn" id="7_y4f0i"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="7_y4f0i"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
 

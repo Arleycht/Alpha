@@ -24,11 +24,6 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/character/character.gd"
 }, {
-"base": "RefCounted",
-"class": &"Common",
-"language": &"GDScript",
-"path": "res://scripts/common.gd"
-}, {
 "base": "Node",
 "class": &"Daemon",
 "language": &"GDScript",
@@ -42,7 +37,7 @@ _global_script_classes=[{
 "base": "Resource",
 "class": &"Navigator",
 "language": &"GDScript",
-"path": "res://scripts/navigator.gd"
+"path": "res://scripts/ai/navigator.gd"
 }, {
 "base": "RefCounted",
 "class": &"PhysicsRaycastResult",
@@ -52,12 +47,12 @@ _global_script_classes=[{
 "base": "Node3D",
 "class": &"Player",
 "language": &"GDScript",
-"path": "res://scripts/player.gd"
+"path": "res://scripts/player/player.gd"
 }, {
 "base": "CharacterController3D",
 "class": &"PlayerCharacterController",
 "language": &"GDScript",
-"path": "res://scripts/player_character_controller.gd"
+"path": "res://scripts/player/player_character_controller.gd"
 }, {
 "base": "Node3D",
 "class": &"World",
@@ -73,7 +68,6 @@ _global_script_class_icons={
 "Anthropoid": "",
 "CameraController": "",
 "Character": "",
-"Common": "",
 "Daemon": "",
 "EnvironmentManager": "",
 "Navigator": "",
@@ -92,6 +86,10 @@ config/use_custom_user_dir=true
 config/custom_user_dir_name="project_alpha"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 config/icon="res://icon.png"
+
+[autoload]
+
+Globals="*res://scripts/globals.gd"
 
 [debug]
 

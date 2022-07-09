@@ -2,10 +2,6 @@ class_name WorldLoader
 extends Object
 
 
-const MODULES_PATH := "user://modules"
-const DEFAULT_TEXTURE_PATH := "res://modules/core/textures/null.png"
-const DEFAULT_TEXTURE_ID := "core/null.png"
-
 var library: VoxelBlockyLibrary
 var materials: Array
 
@@ -50,8 +46,8 @@ func _load() -> void:
 					texture_id = "%s/%s" % [module_name, path.get_file()]
 				else:
 					printerr("Failed to find \"%s\"" % path)
-					path = DEFAULT_TEXTURE_PATH
-					texture_id = DEFAULT_TEXTURE_ID
+					path = Globals.DEFAULT_TEXTURE_PATH
+					texture_id = Globals.DEFAULT_TEXTURE_ID
 				
 				var image := _load_image(path)
 				def['textures'][side] = texture_id
@@ -156,15 +152,15 @@ func _pack_atlas(atlas_map: Dictionary, padding: int = 2) -> Vector2i:
 func _load_modules() -> Dictionary:
 	var modules := {}
 	
-	var module_paths := ["res://modules/core"]
+	var module_paths := [Globals.CORE_MODULE_PATH]
 	var dir := Directory.new()
 	
-	if dir.open(MODULES_PATH) == OK:
+	if dir.open(Globals.MODULES_PATH) == OK:
 		for module_name in dir.get_directories():
 			module_paths.append(dir.get_current_dir() + "/" + module_name)
 	
 	for module_path in module_paths:
-		var module_name := module_path.split('/')[-1]
+		var module_name := str(module_path).split('/')[-1]
 		var load_order := 0
 		var config := ConfigFile.new()
 		var definitions := []
@@ -225,9 +221,10 @@ func _load_image(path: String) -> Image:
 		if t is Texture2D:
 			img = t.get_image()
 		else:
-			img.load(DEFAULT_TEXTURE_PATH)
+			img.load(Globals.DEFAULT_TEXTURE_PATH)
 	else:
 		img.load(path)
+	
 	img.convert(Image.FORMAT_RGBA8)
 	
 	return img
