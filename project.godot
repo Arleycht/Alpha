@@ -54,11 +54,6 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/player/player_character_controller.gd"
 }, {
-"base": "Resource",
-"class": &"Task",
-"language": &"GDScript",
-"path": "res://scripts/character/ai/tasks/task.gd"
-}, {
 "base": "Node3D",
 "class": &"World",
 "language": &"GDScript",
@@ -79,7 +74,6 @@ _global_script_class_icons={
 "PhysicsRaycastResult": "",
 "Player": "",
 "PlayerCharacterController": "",
-"Task": "",
 "World": "",
 "WorldLoader": ""
 }
