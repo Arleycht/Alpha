@@ -4,6 +4,9 @@ extends Object
 
 var library: VoxelBlockyLibrary
 var materials: Array
+var voxel_definitions := {}
+var id_map := {}
+var atlas_map := {}
 
 
 func _init() -> void:
@@ -19,9 +22,6 @@ func _load() -> void:
 		return a['load_order'] < b['load_order']
 	)
 	
-	var voxel_definitions := {}
-	var atlas_map := {}
-	
 	# Generate atlas map
 	
 	for module_name in module_names:
@@ -34,6 +34,7 @@ func _load() -> void:
 				printerr("Skipping duplicated voxel at \"%s\"" % voxel_id)
 				continue
 			else:
+				def['name'] = voxel_id
 				voxel_definitions[voxel_id] = def
 			
 			for side in def['textures']:
@@ -46,8 +47,8 @@ func _load() -> void:
 					texture_id = "%s/%s" % [module_name, path.get_file()]
 				else:
 					printerr("Failed to find \"%s\"" % path)
-					path = Globals.DEFAULT_TEXTURE_PATH
-					texture_id = Globals.DEFAULT_TEXTURE_ID
+					path = Constants.DEFAULT_TEXTURE_PATH
+					texture_id = Constants.DEFAULT_TEXTURE_ID
 				
 				var image := _load_image(path)
 				def['textures'][side] = texture_id
@@ -84,18 +85,22 @@ func _load() -> void:
 	library = VoxelBlockyLibrary.new()
 	library.voxel_count = voxel_definitions.size() + 1
 	library.bake_tangents = false
-	library.create_voxel(0, "empty")
+	library.create_voxel(0, "air")
+	id_map[0] = {
+		'name': 'core:air',
+	}
 	
 	var i := 1
 	for id in voxel_definitions:
 		var def: Dictionary = voxel_definitions[id]
-		var voxel := library.create_voxel(i, def['name'])
 		var mesh := _build_cube_mesh(atlas_map, atlas_texture.get_size(), def['textures'])
-		
+		var voxel := library.create_voxel(i, def['name'])
 		voxel.geometry_type = VoxelBlockyModel.GEOMETRY_CUSTOM_MESH
 		voxel.custom_mesh = mesh
 		voxel.set_material_override(0, default_material)
 		
+		def['id'] = i
+		id_map[i] = def
 		i += 1
 	
 	library.bake()
@@ -152,10 +157,10 @@ func _pack_atlas(atlas_map: Dictionary, padding: int = 2) -> Vector2i:
 func _load_modules() -> Dictionary:
 	var modules := {}
 	
-	var module_paths := [Globals.CORE_MODULE_PATH]
+	var module_paths := [Constants.CORE_MODULE_PATH]
 	var dir := Directory.new()
 	
-	if dir.open(Globals.MODULES_PATH) == OK:
+	if dir.open(Constants.MODULES_PATH) == OK:
 		for module_name in dir.get_directories():
 			module_paths.append(dir.get_current_dir() + "/" + module_name)
 	
@@ -221,7 +226,7 @@ func _load_image(path: String) -> Image:
 		if t is Texture2D:
 			img = t.get_image()
 		else:
-			img.load(Globals.DEFAULT_TEXTURE_PATH)
+			img.load(Constants.DEFAULT_TEXTURE_PATH)
 	else:
 		img.load(path)
 	

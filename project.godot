@@ -54,6 +54,11 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/player/player_character_controller.gd"
 }, {
+"base": "Resource",
+"class": &"Task",
+"language": &"GDScript",
+"path": "res://scripts/character/ai/tasks/task.gd"
+}, {
 "base": "Node3D",
 "class": &"World",
 "language": &"GDScript",
@@ -62,7 +67,7 @@ _global_script_classes=[{
 "base": "Object",
 "class": &"WorldLoader",
 "language": &"GDScript",
-"path": "res://scripts/world_loader.gd"
+"path": "res://scripts/world/world_loader.gd"
 }]
 _global_script_class_icons={
 "Anthropoid": "",
@@ -74,6 +79,7 @@ _global_script_class_icons={
 "PhysicsRaycastResult": "",
 "Player": "",
 "PlayerCharacterController": "",
+"Task": "",
 "World": "",
 "WorldLoader": ""
 }
@@ -89,7 +95,8 @@ config/icon="res://icon.png"
 
 [autoload]
 
-Globals="*res://scripts/util/globals.gd"
+Constants="*res://scripts/util/constants.gd"
+Util="*res://scripts/util/util.gd"
 
 [debug]
 
