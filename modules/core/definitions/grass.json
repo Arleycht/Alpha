@@ -1,8 +1,11 @@
 {
 	"name": "grass",
 	"textures": {
+		"south": "grass_side.png",
+		"west": "grass_side.png",
+		"north": "grass_side.png",
+		"east": "grass_side.png",
 		"top": "grass_top.png",
 		"bottom": "grass_bottom.png",
-		"side": "grass_side.png"
 	}
 }
