@@ -24,10 +24,10 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/character/character.gd"
 }, {
-"base": "Node",
+"base": "Node3D",
 "class": &"Daemon",
 "language": &"GDScript",
-"path": "res://scripts/daemon.gd"
+"path": "res://scripts/character/ai/daemon.gd"
 }, {
 "base": "WorldEnvironment",
 "class": &"EnvironmentManager",
@@ -37,7 +37,7 @@ _global_script_classes=[{
 "base": "Resource",
 "class": &"Navigator",
 "language": &"GDScript",
-"path": "res://scripts/ai/navigator.gd"
+"path": "res://scripts/character/ai/navigator.gd"
 }, {
 "base": "RefCounted",
 "class": &"PhysicsRaycastResult",
@@ -57,7 +57,7 @@ _global_script_classes=[{
 "base": "Node3D",
 "class": &"World",
 "language": &"GDScript",
-"path": "res://scripts/world.gd"
+"path": "res://scripts/world/world.gd"
 }, {
 "base": "Object",
 "class": &"WorldLoader",
@@ -89,7 +89,7 @@ config/icon="res://icon.png"
 
 [autoload]
 
-Globals="*res://scripts/globals.gd"
+Globals="*res://scripts/util/globals.gd"
 
 [debug]
 

@@ -2,6 +2,7 @@ class_name Navigator
 extends Resource
 
 
+var world: World
 var character: Character
 
 var _path: Array
@@ -10,12 +11,10 @@ var _prev_check_msec: int
 var _prev_pos: Vector3
 
 
-@warning_ignore(shadowed_variable)
-func _init(character: Character) -> void:
-	self.character = character
-
-
 func update() -> void:
+	if world == null or character == null:
+		return
+	
 	if not is_path_empty():
 		var target := get_position()
 		var close_enough := maxf(character.get_aabb().size.x, character.get_aabb().size.z)
@@ -63,6 +62,9 @@ func update() -> void:
 
 
 func move_to(from: Vector3, to: Vector3) -> void:
+	if world == null or character == null:
+		return
+	
 	var from_i := Globals.align_vector(from)
 	var to_i := Globals.align_vector(to)
 	_pathfind(from_i, to_i)
@@ -96,14 +98,14 @@ func is_path_empty() -> bool:
 
 
 func _is_valid_floor(pos: Vector3i) -> bool:
-	var voxel_id := character.world.get_voxel(pos)
+	var voxel_id := world.get_voxel(pos)
 	# TODO: Get these from configuration, i.e. voxels tagged with something
 	# that says they are a valid floor voxel
 	return voxel_id in [1]
 
 
 func _is_valid_air(pos: Vector3i) -> bool:
-	var voxel_id := character.world.get_voxel(pos)
+	var voxel_id := world.get_voxel(pos)
 	# TODO: Get these from configuration
 	return voxel_id in [0]
 
@@ -192,7 +194,7 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		if not found:
 			return
 	
-	if not clearance_fn.call(to) or not character.world.is_position_loaded(to):
+	if not clearance_fn.call(to) or not world.is_position_loaded(to):
 		return
 	
 	var open := [from]
@@ -233,7 +235,7 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		neighbors.shuffle()
 		
 		for n in neighbors:
-			if not character.world.is_position_loaded(n):
+			if not world.is_position_loaded(n):
 				continue
 			
 			if not clearance_fn.call(n) or not _is_traversal_clear(current, n):

@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://cqyx6qlmpnfd5"]
+[gd_scene load_steps=5 format=3 uid="uid://bes072dhqj53u"]
 
 [ext_resource type="Script" path="res://scripts/character/anthropoid.gd" id="1_1sju3"]
 
@@ -13,7 +13,7 @@ height = 0.625
 [sub_resource type="BoxShape3D" id="BoxShape3D_6wgqc"]
 size = Vector3(0.36, 0.9, 0.36)
 
-[node name="TestUnit" type="CharacterBody3D"]
+[node name="Anthropoid" type="CharacterBody3D"]
 top_level = true
 script = ExtResource("1_1sju3")
 

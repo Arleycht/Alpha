@@ -1,9 +1,18 @@
-[gd_resource type="Theme" load_steps=4 format=3 uid="uid://by1kcdusj80r5"]
+[gd_resource type="Theme" load_steps=7 format=3 uid="uid://by1kcdusj80r5"]
 
 [ext_resource type="Texture2D" uid="uid://ci4nkjs03khhm" path="res://modules/core/textures/null.png" id="1_atsxf"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v0ksu"]
+draw_center = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jrdbw"]
+bg_color = Color(0.439216, 0.439216, 0.439216, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k7at8"]
-bg_color = Color(0.5, 0.5, 0.5, 1)
+bg_color = Color(0.501961, 0.501961, 0.501961, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_24uuy"]
+bg_color = Color(0.627451, 0.627451, 0.627451, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ims6k"]
 texture = ExtResource("1_atsxf")
@@ -12,5 +21,8 @@ axis_stretch_vertical = 1
 region_rect = Rect2(0, 0, 32, 32)
 
 [resource]
+Button/styles/focus = SubResource("StyleBoxFlat_v0ksu")
+Button/styles/hover = SubResource("StyleBoxFlat_jrdbw")
 Button/styles/normal = SubResource("StyleBoxFlat_k7at8")
+Button/styles/pressed = SubResource("StyleBoxFlat_24uuy")
 PanelContainer/styles/panel = SubResource("StyleBoxTexture_ims6k")

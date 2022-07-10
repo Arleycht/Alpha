@@ -14,39 +14,14 @@ signal landed
 @export var gravity_strength := 9.8
 @export var gravity_direction: Vector3 = Vector3.DOWN
 
-var world: World
 var wish_vector: Vector3
-var box_mover: VoxelBoxMover
-var navigator: Navigator
 
 var _ground_frames := 0
 var _jumping := false
 var _jump_buffered := false
 
 
-func _ready() -> void:
-	box_mover = VoxelBoxMover.new()
-	navigator = Navigator.new(self)
-
-
 func _physics_process(delta: float) -> void:
-	if world == null:
-		var p = get_parent()
-		
-		while p != null:
-			if p is World:
-				world = p
-				break
-			
-			p = get_parent()
-		
-		return
-	elif not world.is_position_loaded(position):
-		return
-	
-	wish_vector = Vector3()
-	navigator.update()
-	
 	velocity += gravity_direction * gravity_strength * delta
 	_update_movement(delta)
 	
@@ -69,7 +44,7 @@ func _physics_process(delta: float) -> void:
 	
 	if is_on_floor():
 		if _ground_frames == 0:
-			emit_signal("landed")
+			landed.emit()
 		
 		_jumping = false
 		
@@ -86,15 +61,11 @@ func _physics_process(delta: float) -> void:
 func get_aabb() -> AABB:
 	var aabb := AABB()
 	
-	for c in find_children("", "CollisionShape3D", true):
+	for c in find_children("*", "CollisionShape3D", true):
 		if c is CollisionShape3D:
 			aabb = aabb.merge(c.shape.get_debug_mesh().get_aabb())
 	
 	return aabb
-
-
-func move_to(to: Vector3) -> void:
-	navigator.move_to(position, to)
 
 
 func jump() -> bool:
@@ -103,7 +74,7 @@ func jump() -> bool:
 		velocity += -gravity_direction * gravity_strength * get_physics_process_delta_time()
 		_jumping = true
 		_jump_buffered = false
-		emit_signal("jumped")
+		jumped.emit()
 		return true
 	elif not _jump_buffered:
 		_jump_buffered = true

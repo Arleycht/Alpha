@@ -20,6 +20,8 @@ func _ready() -> void:
 	_loader = WorldLoader.new()
 	_stream = VoxelStreamSQLite.new()
 	
+#	_stream.database_path = 
+	
 	# Test generator
 	var generator := VoxelGeneratorNoise2D.new()
 	generator.noise = FastNoiseLite.new()
@@ -34,9 +36,17 @@ func _ready() -> void:
 	terrain = VoxelTerrain.new()
 	tool = terrain.get_voxel_tool()
 	
+	var max_height := 100
+	var min_height := -100
+	var world_size := 5
+	var pos := Vector3(0, min_height, 0)
+	var size := Vector3(1, 0, 1) * world_size * Globals.BLOCK_SIZE
+	size.y = abs(max_height - min_height)
+	
 	terrain.mesher = mesher
 	terrain.generator = generator
-	terrain.max_view_distance = 192
+	terrain.max_view_distance = 256
+	terrain.bounds = AABB(pos, size)
 	
 	terrain.name = "VoxelTerrain"
 	add_child(terrain)
@@ -79,8 +89,12 @@ func is_aabb_uniform(aabb: AABB, id: int) -> bool:
 	return true
 
 
+func is_out_of_bounds(pos: Vector3) -> bool:
+	return not terrain.bounds.has_point(pos)
+
+
 func is_position_loaded(pos: Vector3) -> bool:
-	var bpos := Globals.align_vector(pos)
+	var bpos := Globals.align_vector(pos) / Globals.BLOCK_SIZE
 	
 	if bpos in _loaded_blocks:
 		if _loaded_blocks[bpos]:
@@ -88,8 +102,16 @@ func is_position_loaded(pos: Vector3) -> bool:
 			return true
 		
 		# Empty locations are technically always loaded
-		var aabb := AABB(bpos * Globals.BLOCK_SIZE, Vector3.ONE * Globals.BLOCK_SIZE)
-		return is_aabb_uniform(aabb, 0)
+		
+		var empty := true
+		
+		Globals.for_each_cell_YXZ(bpos, func(pos: Vector3i):
+			if tool.get_voxel(pos) != 0:
+				empty = false
+				return true
+		)
+		
+		return empty
 	
 	return false
 
@@ -104,6 +126,11 @@ func _deferred_mesh_update(bpos: Vector3i, loaded: bool) -> void:
 
 
 func _on_block_loaded(bpos: Vector3i) -> void:
+	var origin := bpos * Globals.BLOCK_SIZE
+	var size := Vector3.ONE * Globals.BLOCK_SIZE
+	
+	
+	
 	if bpos not in _loaded_blocks:
 		_loaded_blocks[bpos] = false
 

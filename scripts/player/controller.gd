@@ -1,6 +1,8 @@
 extends Control
 
 
+signal selection_changed
+
 enum ControlMode {
 	SELECT,
 	DIG,
@@ -33,9 +35,8 @@ func _ready() -> void:
 	else:
 		printerr("HUD is not parented to a player")
 	
-	for button in get_tree().get_nodes_in_group("command_buttons"):
-		if button is Button:
-			(button as Button).pressed.connect(_on_button_pressed)
+	for button in _get_mode_buttons():
+		button.pressed.connect(_on_button_pressed.bind(button))
 
 
 func _input(event: InputEvent) -> void:
@@ -43,11 +44,18 @@ func _input(event: InputEvent) -> void:
 		return
 	
 	if event.is_action_pressed("primary"):
-		if control_mode == ControlMode.SELECT:
+		if Input.is_action_pressed("control"):
+			var p_result := Globals.physics_cast(get_camera())
+			var a := player.daemon.spawn_anthropoid()
+			
+			a.position = p_result.position + Vector3(0, 0.5, 0)
+			
+			get_viewport().set_input_as_handled()
+		elif control_mode == ControlMode.SELECT:
 			select()
 	elif event.is_action_released("secondary"):
 		if selection_mode == SelectionMode.CHARACTERS:
-			var v_result := voxel_cast()
+			var v_result := Globals.voxel_cast(get_camera(), player.world)
 			
 			if v_result != null:
 				var pos := v_result.position + Vector3i(0, 1, 0)
@@ -57,26 +65,9 @@ func _input(event: InputEvent) -> void:
 						c.move_to(pos)
 				
 				get_viewport().set_input_as_handled()
-	
-	if event.is_action_pressed("space"):
+	elif event.is_action_pressed("space"):
 		get_tree().paused = not get_tree().paused
 		get_viewport().set_input_as_handled()
-
-
-func physics_cast(max_distance: float = 100.0) -> PhysicsRaycastResult:
-	var camera := get_camera()
-	var mouse_pos := get_viewport().get_mouse_position()
-	var origin := camera.project_ray_origin(mouse_pos)
-	var direction := camera.project_ray_normal(mouse_pos)
-	return Globals.physics_cast(camera, origin, direction * max_distance)
-
-
-func voxel_cast(max_distance: float = 100.0) -> VoxelRaycastResult:
-	var camera := get_camera()
-	var mouse_pos := get_viewport().get_mouse_position()
-	var origin := camera.project_ray_origin(mouse_pos)
-	var direction := camera.project_ray_normal(mouse_pos)
-	return Globals.voxel_cast(player.world, origin, direction * max_distance)
 
 
 func is_selectable(object) -> bool:
@@ -99,25 +90,25 @@ func is_selectable(object) -> bool:
 
 
 func select() -> bool:
-	var selected
+	var new_selection
 	
-	var p_result := physics_cast()
+	var p_result := Globals.physics_cast(get_camera())
 	if p_result != null and is_selectable(p_result.collider):
-		selected = p_result.collider
+		new_selection = p_result.collider
 	else:
-		var v_result := voxel_cast()
+		var v_result := Globals.voxel_cast(get_camera(), player.world)
 		if v_result != null and is_selectable(v_result.position):
-			selected = v_result.position
+			new_selection = v_result.position
 	
-	if selected != null:
+	if new_selection != null:
 		if not Input.is_action_pressed("shift"):
 			clear_selection()
 		
-		if not selected in selection:
-			selection.append(selected)
+		if not new_selection in selection:
+			selection.append(new_selection)
 			
-			if selected is Character:
-				_mark(selected)
+			if new_selection is Character:
+				_mark(new_selection)
 		
 		get_viewport().set_input_as_handled()
 		return true
@@ -131,6 +122,7 @@ func clear_selection() -> void:
 	selection.clear()
 	_object_markers.map(func(x: Node): x.queue_free())
 	_object_markers.clear()
+	selection_changed.emit()
 
 
 func get_camera() -> Camera3D:
@@ -146,5 +138,28 @@ func _mark(character: Character) -> void:
 	_object_markers.append(marker)
 
 
-func _on_button_pressed() -> void:
-	print("Button pressed")
+func _get_mode_buttons() -> Array:
+	return get_tree().get_nodes_in_group("mode_buttons")
+
+
+func _on_button_pressed(button: Button) -> void:
+	var selected_mode := ControlMode.SELECT
+	var selected := false
+	
+	match str(button.name).to_lower():
+		"dig":
+			selected_mode = ControlMode.DIG
+		"build":
+			selected_mode = ControlMode.BUILD
+	
+	if control_mode == selected_mode:
+		control_mode = ControlMode.SELECT
+	else:
+		control_mode = selected_mode
+		selected = true
+	
+	for b in _get_mode_buttons():
+		b.button_pressed = false
+	
+	if selected:
+		button.button_pressed = true
