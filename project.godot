@@ -84,7 +84,7 @@ config/name="Alpha"
 run/main_scene="res://scenes/world.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="project_alpha"
-config/features=PackedStringArray("4.0", "Vulkan Clustered")
+config/features=PackedStringArray("4.0", "C#", "Vulkan Clustered")
 config/icon="res://icon.png"
 
 [autoload]
