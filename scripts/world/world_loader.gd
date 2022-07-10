@@ -8,6 +8,9 @@ var voxel_definitions := {}
 var id_map := {}
 var atlas_map := {}
 
+var atlas_image: Image
+var atlas_texture: ImageTexture
+
 
 func _init() -> void:
 	_load()
@@ -60,9 +63,8 @@ func _load() -> void:
 	# Stitch textures
 	
 	var size := _pack_atlas(atlas_map)
-	var atlas_image := Image.new()
-	var atlas_texture: ImageTexture
 	
+	atlas_image = Image.new()
 	atlas_image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
 	
 	for texture_id in atlas_map:
@@ -93,7 +95,7 @@ func _load() -> void:
 	var i := 1
 	for id in voxel_definitions:
 		var def: Dictionary = voxel_definitions[id]
-		var mesh := _build_cube_mesh(atlas_map, atlas_texture.get_size(), def['textures'])
+		var mesh := _build_cube_mesh(def['textures'])
 		var voxel := library.create_voxel(i, def['name'])
 		voxel.geometry_type = VoxelBlockyModel.GEOMETRY_CUSTOM_MESH
 		voxel.custom_mesh = mesh
@@ -244,8 +246,7 @@ func _map_uv(rect: Rect2i, atlas_size: Vector2):
 	return [d, a, b, d, c, a]
 
 
-func _build_cube_mesh(atlas_map: Dictionary, atlas_size: Vector2,
-		textures: Dictionary) -> ArrayMesh:
+func _build_cube_mesh(textures: Dictionary) -> ArrayMesh:
 	var vertices := [
 		Vector3(1, 0, 0),
 		Vector3(1, 0, 1),
@@ -302,6 +303,8 @@ func _build_cube_mesh(atlas_map: Dictionary, atlas_size: Vector2,
 	
 	# Map UVs to texture atlas
 	
+	var atlas_size := atlas_texture.get_size()
+	
 	if 'all' in textures:
 		var texture_id: String = textures['all']
 		var rect: Rect2i = atlas_map[texture_id]['rect']
@@ -332,8 +335,6 @@ func _build_cube_mesh(atlas_map: Dictionary, atlas_size: Vector2,
 					face = 4
 				"bottom":
 					face = 5
-				_:
-					continue
 			
 			for i in 6:
 				uvs[(face * 6) + i] = face_uv[i]
