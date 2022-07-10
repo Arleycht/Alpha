@@ -1,28 +1,33 @@
 extends Node3D
 
-
-# Initialization constants
-
-const BLOCK_SIZE := 16
-const MODULES_PATH := "user://modules"
-const CORE_MODULE_PATH := "res://modules/core"
-const DEFAULT_TEXTURE_PATH := "res://modules/core/textures/null.png"
-const DEFAULT_TEXTURE_ID := "core/null.png"
-
-
 ## Returns the vector aligned to coordinates
 static func align_vector(v: Vector3) -> Vector3i:
 	return Vector3i(v.floor())
 
 
+## Returns the AABB that describes the volume between u and v
+static func get_aabb(u: Vector3i, v: Vector3i) -> AABB:
+	var size: Vector3i = abs(v - u)
+	var pos: Vector3i = get_min_axes(u, v)
+	return AABB(pos, size)
+
+
+static func get_min_axes(u: Vector3i, v: Vector3i) -> Vector3i:
+	return Vector3i(min(u.x, v.x), min(u.y, v.y), min(u.z, v.z))
+
+
+static func get_max_axes(u: Vector3i, v: Vector3i) -> Vector3i:
+	return Vector3i(max(u.x, v.x), max(u.y, v.y), max(u.z, v.z))
+
+
 ## Calls the function f over all cell positions in a given block.
 ## Loop can be broken early if f returns true.
 static func for_each_cell_YXZ(bpos: Vector3i, f: Callable) -> void:
-	var origin := bpos * BLOCK_SIZE
+	var origin := bpos * Constants.BLOCK_SIZE
 	
-	for j in BLOCK_SIZE:
-		for i in BLOCK_SIZE:
-			for k in BLOCK_SIZE:
+	for j in Constants.BLOCK_SIZE:
+		for i in Constants.BLOCK_SIZE:
+			for k in Constants.BLOCK_SIZE:
 				if f.call(origin + Vector3i(i, j, k)):
 					return
 

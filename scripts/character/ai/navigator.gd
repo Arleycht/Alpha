@@ -65,8 +65,8 @@ func move_to(from: Vector3, to: Vector3) -> void:
 	if world == null or character == null:
 		return
 	
-	var from_i := Globals.align_vector(from)
-	var to_i := Globals.align_vector(to)
+	var from_i := Util.align_vector(from)
+	var to_i := Util.align_vector(to)
 	_pathfind(from_i, to_i)
 
 

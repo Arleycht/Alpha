@@ -40,7 +40,7 @@ func _ready() -> void:
 	var min_height := -100
 	var world_size := 5
 	var pos := Vector3(0, min_height, 0)
-	var size := Vector3(1, 0, 1) * world_size * Globals.BLOCK_SIZE
+	var size := Vector3(1, 0, 1) * world_size * Constants.BLOCK_SIZE
 	size.y = abs(max_height - min_height)
 	
 	terrain.mesher = mesher
@@ -63,7 +63,9 @@ func _physics_process(delta: float) -> void:
 	env.time += delta / 60.0
 
 
-func set_voxel(pos: Vector3i, id: int) -> bool:
+func set_voxel(pos: Vector3i, voxel_id: String) -> bool:
+	var id: int = _loader.voxel_definitions[voxel_id]['id']
+	
 	if tool.is_area_editable(AABB(pos, Vector3.ONE)):
 		tool.set_voxel(pos, id)
 		return true
@@ -71,8 +73,8 @@ func set_voxel(pos: Vector3i, id: int) -> bool:
 	return false
 
 
-func get_voxel(pos: Vector3i) -> int:
-	return tool.get_voxel(pos)
+func get_voxel(pos: Vector3i) -> String:
+	return _loader.id_map[tool.get_voxel(pos)]['name']
 
 
 func is_aabb_uniform(aabb: AABB, id: int) -> bool:
@@ -94,7 +96,7 @@ func is_out_of_bounds(pos: Vector3) -> bool:
 
 
 func is_position_loaded(pos: Vector3) -> bool:
-	var bpos := Globals.align_vector(pos) / Globals.BLOCK_SIZE
+	var bpos: Vector3i = Util.align_vector(pos) / Constants.BLOCK_SIZE
 	
 	if bpos in _loaded_blocks:
 		if _loaded_blocks[bpos]:
@@ -105,7 +107,7 @@ func is_position_loaded(pos: Vector3) -> bool:
 		
 		var empty := true
 		
-		Globals.for_each_cell_YXZ(bpos, func(pos: Vector3i):
+		Util.for_each_cell_YXZ(bpos, func(pos: Vector3i):
 			if tool.get_voxel(pos) != 0:
 				empty = false
 				return true
@@ -126,10 +128,13 @@ func _deferred_mesh_update(bpos: Vector3i, loaded: bool) -> void:
 
 
 func _on_block_loaded(bpos: Vector3i) -> void:
-	var origin := bpos * Globals.BLOCK_SIZE
-	var size := Vector3.ONE * Globals.BLOCK_SIZE
+	var origin := bpos * Constants.BLOCK_SIZE
+	var size := Vector3.ONE * Constants.BLOCK_SIZE
 	
-	
+	Util.for_each_cell_YXZ(bpos, func(pos: Vector3i):
+		if get_voxel(pos) == "core:dirt" and get_voxel(pos + Vector3i(0, 1, 0)) == "core:air":
+			set_voxel(pos, "core:grass")
+	)
 	
 	if bpos not in _loaded_blocks:
 		_loaded_blocks[bpos] = false

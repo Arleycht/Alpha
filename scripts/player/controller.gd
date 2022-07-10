@@ -10,7 +10,7 @@ enum ControlMode {
 }
 
 enum SelectionMode {
-	VOXELS,
+	POSITIONS,
 	OBJECTS,
 	CHARACTERS,
 }
@@ -20,7 +20,7 @@ const TIME_SCALE_MAX := 3
 var player: Player
 
 var control_mode := ControlMode.SELECT
-var selection_mode := SelectionMode.VOXELS
+var selection_mode := SelectionMode.POSITIONS
 var selection: Array
 
 var time_scale := 1
@@ -37,6 +37,8 @@ func _ready() -> void:
 	
 	for button in _get_mode_buttons():
 		button.pressed.connect(_on_button_pressed.bind(button))
+	
+	selection_changed.connect(_on_selection_changed)
 
 
 func _input(event: InputEvent) -> void:
@@ -45,17 +47,17 @@ func _input(event: InputEvent) -> void:
 	
 	if event.is_action_pressed("primary"):
 		if Input.is_action_pressed("control"):
-			var p_result := Globals.physics_cast(get_camera())
+			var p_result := Util.physics_cast(get_camera())
 			var a := player.daemon.spawn_anthropoid()
 			
 			a.position = p_result.position + Vector3(0, 0.5, 0)
 			
 			get_viewport().set_input_as_handled()
-		elif control_mode == ControlMode.SELECT:
+		else:
 			select()
 	elif event.is_action_released("secondary"):
 		if selection_mode == SelectionMode.CHARACTERS:
-			var v_result := Globals.voxel_cast(get_camera(), player.world)
+			var v_result := Util.voxel_cast(get_camera(), player.world)
 			
 			if v_result != null:
 				var pos := v_result.position + Vector3i(0, 1, 0)
@@ -73,7 +75,7 @@ func _input(event: InputEvent) -> void:
 func is_selectable(object) -> bool:
 	if selection.is_empty():
 		if object is Vector3i:
-			selection_mode = SelectionMode.VOXELS
+			selection_mode = SelectionMode.POSITIONS
 		elif object is Character:
 			selection_mode = SelectionMode.CHARACTERS
 		else:
@@ -82,7 +84,7 @@ func is_selectable(object) -> bool:
 	if selection_mode == SelectionMode.CHARACTERS:
 		if object is Character and object.is_physics_processing():
 			return true
-	elif selection_mode == SelectionMode.VOXELS:
+	elif selection_mode == SelectionMode.POSITIONS:
 		if object is Vector3i:
 			return player.world.get_voxel(object) in [1]
 	
@@ -92,11 +94,11 @@ func is_selectable(object) -> bool:
 func select() -> bool:
 	var new_selection
 	
-	var p_result := Globals.physics_cast(get_camera())
+	var p_result := Util.physics_cast(get_camera())
 	if p_result != null and is_selectable(p_result.collider):
 		new_selection = p_result.collider
 	else:
-		var v_result := Globals.voxel_cast(get_camera(), player.world)
+		var v_result := Util.voxel_cast(get_camera(), player.world)
 		if v_result != null and is_selectable(v_result.position):
 			new_selection = v_result.position
 	
@@ -110,6 +112,7 @@ func select() -> bool:
 			if new_selection is Character:
 				_mark(new_selection)
 		
+		selection_changed.emit()
 		get_viewport().set_input_as_handled()
 		return true
 	else:
@@ -140,6 +143,25 @@ func _mark(character: Character) -> void:
 
 func _get_mode_buttons() -> Array:
 	return get_tree().get_nodes_in_group("mode_buttons")
+
+
+func _on_selection_changed() -> void:
+	print("Selection changed")
+	
+	match control_mode:
+		ControlMode.DIG:
+			# Schedule dig tasks in daemon
+			if selection_mode != SelectionMode.POSITIONS:
+				return
+			
+			if selection.size() >= 2:
+				var aabb := Util.get_aabb(selection[0], selection[1])
+				player.world.tool.do_box(aabb.position, aabb.end)
+				
+				print("Dig")
+		ControlMode.BUILD:
+			# Schedule build tasks in daemon
+			pass
 
 
 func _on_button_pressed(button: Button) -> void:

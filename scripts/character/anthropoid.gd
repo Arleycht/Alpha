@@ -21,6 +21,7 @@ func _physics_process(delta: float) -> void:
 		queue_free.call_deferred()
 	
 	# Perform AI processes
+	
 	wish_vector = Vector3()
 	navigator.update()
 	
