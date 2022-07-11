@@ -14,11 +14,6 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/character/anthropoid.gd"
 }, {
-"base": "Node3D",
-"class": &"CameraController",
-"language": &"GDScript",
-"path": "res://scripts/camera_controller.gd"
-}, {
 "base": "CharacterBody3D",
 "class": &"Character",
 "language": &"GDScript",
@@ -29,29 +24,16 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/character/ai/daemon.gd"
 }, {
-"base": "WorldEnvironment",
-"class": &"EnvironmentManager",
-"language": &"GDScript",
-"path": "res://scripts/environment_manager.gd"
-}, {
 "base": "Resource",
 "class": &"Navigator",
 "language": &"GDScript",
 "path": "res://scripts/character/ai/navigator.gd"
-}, {
-"base": "Node3D",
-"class": &"Player",
-"language": &"GDScript",
-"path": "res://scripts/player/player.gd"
 }]
 _global_script_class_icons={
 "Anthropoid": "",
-"CameraController": "",
 "Character": "",
 "Daemon": "",
-"EnvironmentManager": "",
-"Navigator": "",
-"Player": ""
+"Navigator": ""
 }
 
 [application]

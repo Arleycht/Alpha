@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://0stmu2gmbti2"]
+[gd_scene load_steps=9 format=3 uid="uid://cvwd8d31qsp3a"]
 
-[ext_resource type="Script" path="res://scripts/camera_controller.gd" id="1_eddrl"]
+[ext_resource type="Script" path="res://scripts/player/Player.cs" id="1_0d014"]
 [ext_resource type="Shader" path="res://shaders/palette.gdshader" id="1_k0fqw"]
 [ext_resource type="Texture2D" uid="uid://70g42gr6aelk" path="res://palettes/bw.png" id="2_og2vy"]
 [ext_resource type="Shader" path="res://shaders/pixelate.gdshader" id="3_gtbil"]
+[ext_resource type="Script" path="res://scripts/player/CameraController.cs" id="3_ie8ef"]
 [ext_resource type="Theme" uid="uid://by1kcdusj80r5" path="res://themes/default.tres" id="3_nyme8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fsif1"]
@@ -18,6 +19,7 @@ shader_param/scale = 4.0
 
 [node name="Player" type="Node3D"]
 top_level = true
+script = ExtResource("1_0d014")
 
 [node name="HUD" type="Control" parent="."]
 texture_filter = 1
@@ -86,7 +88,7 @@ toggle_mode = true
 text = "Build"
 
 [node name="CameraController" type="Camera3D" parent="."]
-script = ExtResource("1_eddrl")
+script = ExtResource("3_ie8ef")
 
 [node name="VoxelViewer" type="VoxelViewer" parent="CameraController"]
 

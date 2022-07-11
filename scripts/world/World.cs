@@ -5,16 +5,27 @@ using System.Collections.Generic;
 public partial class World : Node3D
 {
     public delegate void BlockLoadedHandler(Vector3 bpos);
+    public delegate void BlockUnloadedHandler(Vector3 bpos);
+    public delegate void MeshBlockChangedHandler();
+
     [Signal]
     public event BlockLoadedHandler BlockLoaded
     {
         add => Connect(nameof(BlockLoaded), new Callable(value));
         remove => Disconnect(nameof(BlockLoaded), new Callable(value));
     }
-
-    public delegate void BlockUnloaded(Vector3 bpos);
-
-    public delegate void MeshBlockChanged();
+    [Signal]
+    public event BlockUnloadedHandler BlockUnloaded
+    {
+        add => Connect(nameof(BlockUnloaded), new Callable(value));
+        remove => Disconnect(nameof(BlockUnloaded), new Callable(value));
+    }
+    [Signal]
+    public event MeshBlockChangedHandler MeshBlockChanged
+    {
+        add => Connect(nameof(MeshBlockChanged), new Callable(value));
+        remove => Disconnect(nameof(MeshBlockChanged), new Callable(value));
+    }
 
     private WorldLoader loader;
     private VoxelStreamSQLite stream;
