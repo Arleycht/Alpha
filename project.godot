@@ -43,11 +43,6 @@ _global_script_classes=[{
 "class": &"Player",
 "language": &"GDScript",
 "path": "res://scripts/player/player.gd"
-}, {
-"base": "CharacterController3D",
-"class": &"PlayerCharacterController",
-"language": &"GDScript",
-"path": "res://scripts/player/player_character_controller.gd"
 }]
 _global_script_class_icons={
 "Anthropoid": "",
@@ -56,8 +51,7 @@ _global_script_class_icons={
 "Daemon": "",
 "EnvironmentManager": "",
 "Navigator": "",
-"Player": "",
-"PlayerCharacterController": ""
+"Player": ""
 }
 
 [application]
