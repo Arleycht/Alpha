@@ -48,7 +48,7 @@ public partial class CameraController : Node3D
     public override void _PhysicsProcess(float delta)
     {
         Node3D parent = GetParentOrNull<Node3D>();
-        
+
         if (parent == null)
         {
             return;
@@ -114,7 +114,7 @@ public partial class CameraController : Node3D
         if (@event is InputEventMouseMotion && Input.IsActionPressed("secondary"))
         {
             InputEventMouseMotion mmEvent = @event as InputEventMouseMotion;
-            
+
             if (IsMouseLooking)
             {
                 CameraAngles.x -= mmEvent.Relative.y * CameraSensitivity.y * 1e-2f;
