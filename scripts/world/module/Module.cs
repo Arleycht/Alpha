@@ -1,7 +1,7 @@
 using Godot;
-using GDict = Godot.Collections.Dictionary;
 using System;
 using System.Collections.Generic;
+using GDict = Godot.Collections.Dictionary;
 
 public partial class Module : Resource
 {
@@ -27,7 +27,7 @@ public partial class Module : Resource
         if (dir.Open(modulePath) == Error.Ok && config.Load(configPath) == Error.Ok)
         {
             Path = modulePath;
-            
+
             if (config.HasSection("config"))
             {
                 if (config.HasSectionKey("config", "name"))

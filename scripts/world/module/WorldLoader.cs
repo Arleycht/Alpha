@@ -381,7 +381,7 @@ public partial class WorldLoader : Node3D
                         face = 5;
                         break;
                 }
-                
+
                 for (int i = 0; i < 6; ++i)
                 {
                     uvs[(face * 6) + i] = face_uvs[i];
