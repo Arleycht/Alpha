@@ -1,5 +1,4 @@
 using Godot;
-using GDict = Godot.Collections.Dictionary;
 using System;
 using System.Collections.Generic;
 
