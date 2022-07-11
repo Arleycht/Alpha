@@ -1,10 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://0stmu2gmbti2"]
+[gd_scene load_steps=8 format=3 uid="uid://0stmu2gmbti2"]
 
 [ext_resource type="Script" path="res://scripts/camera_controller.gd" id="1_eddrl"]
-[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_efpoh"]
 [ext_resource type="Shader" path="res://shaders/palette.gdshader" id="1_k0fqw"]
 [ext_resource type="Texture2D" uid="uid://70g42gr6aelk" path="res://palettes/bw.png" id="2_og2vy"]
-[ext_resource type="Script" path="res://scripts/player/controller.gd" id="2_so2xf"]
 [ext_resource type="Shader" path="res://shaders/pixelate.gdshader" id="3_gtbil"]
 [ext_resource type="Theme" uid="uid://by1kcdusj80r5" path="res://themes/default.tres" id="3_nyme8"]
 
@@ -20,7 +18,6 @@ shader_param/scale = 4.0
 
 [node name="Player" type="Node3D"]
 top_level = true
-script = ExtResource("1_efpoh")
 
 [node name="HUD" type="Control" parent="."]
 texture_filter = 1
@@ -29,7 +26,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("2_so2xf")
 
 [node name="PanelContainer" type="PanelContainer" parent="HUD"]
 anchor_left = 1.0

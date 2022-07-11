@@ -19,17 +19,3 @@ func _ready() -> void:
 	daemon.init(world)
 	daemon.name = "PlayerDaemon"
 	add_child(daemon)
-
-
-func _process(_delta: float) -> void:
-	if world == null:
-		var p = get_parent()
-		
-		while p != null:
-			if p is World:
-				world = p
-				break
-			
-			p = get_parent()
-		
-		return

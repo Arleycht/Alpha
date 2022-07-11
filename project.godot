@@ -39,11 +39,6 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/character/ai/navigator.gd"
 }, {
-"base": "RefCounted",
-"class": &"PhysicsRaycastResult",
-"language": &"GDScript",
-"path": "res://scripts/util/physics_raycast_result.gd"
-}, {
 "base": "Node3D",
 "class": &"Player",
 "language": &"GDScript",
@@ -53,16 +48,6 @@ _global_script_classes=[{
 "class": &"PlayerCharacterController",
 "language": &"GDScript",
 "path": "res://scripts/player/player_character_controller.gd"
-}, {
-"base": "Node3D",
-"class": &"World",
-"language": &"GDScript",
-"path": "res://scripts/world/world.gd"
-}, {
-"base": "Object",
-"class": &"WorldLoader",
-"language": &"GDScript",
-"path": "res://scripts/world/world_loader.gd"
 }]
 _global_script_class_icons={
 "Anthropoid": "",
@@ -71,11 +56,8 @@ _global_script_class_icons={
 "Daemon": "",
 "EnvironmentManager": "",
 "Navigator": "",
-"PhysicsRaycastResult": "",
 "Player": "",
-"PlayerCharacterController": "",
-"World": "",
-"WorldLoader": ""
+"PlayerCharacterController": ""
 }
 
 [application]
@@ -86,11 +68,6 @@ config/use_custom_user_dir=true
 config/custom_user_dir_name="project_alpha"
 config/features=PackedStringArray("4.0", "C#", "Vulkan Clustered")
 config/icon="res://icon.png"
-
-[autoload]
-
-Constants="*res://scripts/util/constants.gd"
-Util="*res://scripts/util/util.gd"
 
 [debug]
 
