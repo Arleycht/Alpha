@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://c3raxvruksvev"]
+[gd_scene load_steps=7 format=3 uid="uid://c3raxvruksvev"]
 
 [ext_resource type="Script" path="res://scripts/world/World.cs" id="1_b5xbf"]
-[ext_resource type="PackedScene" uid="uid://0stmu2gmbti2" path="res://scenes/player.tscn" id="7_y4f0i"]
+[ext_resource type="Script" path="res://scripts/world/Environment.cs" id="2_cfr7m"]
+[ext_resource type="PackedScene" uid="uid://cvwd8d31qsp3a" path="res://scenes/player.tscn" id="7_y4f0i"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
 
@@ -30,6 +31,7 @@ script = ExtResource("1_b5xbf")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_svm8j")
+script = ExtResource("2_cfr7m")
 
 [node name="Sun" type="DirectionalLight3D" parent="WorldEnvironment"]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
