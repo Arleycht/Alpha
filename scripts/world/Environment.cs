@@ -6,8 +6,6 @@ public partial class Environment : WorldEnvironment
     public float Angle = 70.0f;
     [Export]
     public float Time = 7.0f;
-    [Export]
-    public NodePath EnvironmentPath;
 
     private DirectionalLight3D Sun;
 
