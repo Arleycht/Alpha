@@ -63,32 +63,16 @@ func _physics_process(delta: float) -> void:
 	env.time += delta / 60.0
 
 
-func set_voxel(pos: Vector3i, voxel_id: String) -> bool:
-	var id: int = _loader.voxel_definitions[voxel_id]['id']
-	
+func set_voxel(pos: Vector3i, voxel_name: String) -> bool:
 	if tool.is_area_editable(AABB(pos, Vector3.ONE)):
-		tool.set_voxel(pos, id)
+		tool.set_voxel(pos, _loader.id_map[voxel_name])
 		return true
 	
 	return false
 
 
 func get_voxel(pos: Vector3i) -> String:
-	return _loader.id_map[tool.get_voxel(pos)]['name']
-
-
-func is_aabb_uniform(aabb: AABB, id: int) -> bool:
-	if not terrain.bounds.encloses(aabb):
-		return id == 0
-	
-	for i in aabb.size.x:
-		for j in aabb.size.y:
-			for k in aabb.size.z:
-				var delta := Vector3(i, j, k)
-				if tool.get_voxel(aabb.position + delta) != id:
-					return false
-	
-	return true
+	return _loader.name_map[tool.get_voxel(pos)]
 
 
 func is_out_of_bounds(pos: Vector3) -> bool:
@@ -107,7 +91,7 @@ func is_position_loaded(pos: Vector3) -> bool:
 		
 		var empty := true
 		
-		Util.for_each_cell_YXZ(bpos, func(pos: Vector3i):
+		Util.for_each_cell(bpos, func(pos: Vector3i):
 			if tool.get_voxel(pos) != 0:
 				empty = false
 				return true
@@ -128,11 +112,8 @@ func _deferred_mesh_update(bpos: Vector3i, loaded: bool) -> void:
 
 
 func _on_block_loaded(bpos: Vector3i) -> void:
-	var origin := bpos * Constants.BLOCK_SIZE
-	var size := Vector3.ONE * Constants.BLOCK_SIZE
-	
-	Util.for_each_cell_YXZ(bpos, func(pos: Vector3i):
-		if get_voxel(pos) == "core:dirt" and get_voxel(pos + Vector3i(0, 1, 0)) == "core:air":
+	Util.for_each_cell(bpos, func(pos: Vector3i):
+		if get_voxel(pos) != "core:air" and get_voxel(pos + Vector3i(0, 1, 0)) == "core:air":
 			set_voxel(pos, "core:grass")
 	)
 	

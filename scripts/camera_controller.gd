@@ -28,7 +28,7 @@ func _ready() -> void:
 	target_y = int(global_transform.origin.y)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var wish_dir := Vector3()
 	var h_plane := Plane(Vector3.UP)
 	
@@ -41,12 +41,10 @@ func _process(_delta: float) -> void:
 	wish_vector += h_plane.project(global_transform.basis.x).normalized() * wish_dir.x
 	wish_vector += h_plane.project(global_transform.basis.z).normalized() * wish_dir.z
 	
+	position += wish_vector.normalized() * camera_speed * delta
+	position.y = lerp(position.y, target_y, 0.3)
+	
 	_update_camera()
-
-
-func _physics_process(delta: float) -> void:
-	get_parent().position += wish_vector.normalized() * camera_speed * delta
-	get_parent().position.y = lerp(get_parent().position.y, target_y, 0.5)
 
 
 func _input(event: InputEvent) -> void:

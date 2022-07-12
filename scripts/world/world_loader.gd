@@ -5,9 +5,9 @@ extends Object
 var library: VoxelBlockyLibrary
 var materials: Array
 var voxel_definitions := {}
-var id_map := {}
 var atlas_map := {}
-
+var id_map := {}
+var name_map := {}
 var atlas_image: Image
 var atlas_texture: ImageTexture
 
@@ -31,14 +31,14 @@ func _load() -> void:
 		for i in modules[module_name]['definitions'].size():
 			var module_path: String = modules[module_name]['path']
 			var def: Dictionary = modules[module_name]['definitions'][i]
-			var voxel_id := "%s:%s" % [module_name, def['name']]
+			var voxel_name := "%s:%s" % [module_name, def['name']]
 			
-			if voxel_id in voxel_definitions:
-				printerr("Skipping duplicated voxel at \"%s\"" % voxel_id)
+			if voxel_name in voxel_definitions:
+				printerr("Skipping duplicated voxel at \"%s\"" % voxel_name)
 				continue
 			else:
-				def['name'] = voxel_id
-				voxel_definitions[voxel_id] = def
+				def['name'] = voxel_name
+				voxel_definitions[voxel_name] = def
 			
 			for side in def['textures']:
 				var file_name: String = def['textures'][side]
@@ -85,25 +85,24 @@ func _load() -> void:
 	# Create library
 	
 	library = VoxelBlockyLibrary.new()
-	library.voxel_count = voxel_definitions.size() + 1
+	library.voxel_count = 1
 	library.bake_tangents = false
-	library.create_voxel(0, "air")
-	id_map[0] = {
-		'name': 'core:air',
-	}
+	library.create_voxel(0, "empty")
+	id_map["core:air"] = 0
+	name_map[0] = "core:air"
 	
-	var i := 1
-	for id in voxel_definitions:
-		var def: Dictionary = voxel_definitions[id]
+	for voxel_name in voxel_definitions:
+		library.voxel_count += 1
+		id_map[voxel_name] = library.voxel_count - 1
+		name_map[library.voxel_count - 1] = voxel_name
+		
+		var def: Dictionary = voxel_definitions[voxel_name]
+		var voxel := library.create_voxel(library.voxel_count - 1, def['name'])
 		var mesh := _build_cube_mesh(def['textures'])
-		var voxel := library.create_voxel(i, def['name'])
+		
 		voxel.geometry_type = VoxelBlockyModel.GEOMETRY_CUSTOM_MESH
 		voxel.custom_mesh = mesh
 		voxel.set_material_override(0, default_material)
-		
-		def['id'] = i
-		id_map[i] = def
-		i += 1
 	
 	library.bake()
 

@@ -22,7 +22,7 @@ static func get_max_axes(u: Vector3i, v: Vector3i) -> Vector3i:
 
 ## Calls the function f over all cell positions in a given block.
 ## Loop can be broken early if f returns true.
-static func for_each_cell_YXZ(bpos: Vector3i, f: Callable) -> void:
+static func for_each_cell(bpos: Vector3i, f: Callable) -> void:
 	var origin := bpos * Constants.BLOCK_SIZE
 	
 	for j in Constants.BLOCK_SIZE:

@@ -1,0 +1,34 @@
+[gd_scene load_steps=5 format=3 uid="uid://bpxispw2wyf1q"]
+
+[ext_resource type="Script" path="res://scripts/environment_manager.gd" id="1_33ls0"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_njevo"]
+
+[sub_resource type="Sky" id="Sky_uaaoc"]
+sky_material = SubResource("PhysicalSkyMaterial_njevo")
+process_mode = 3
+
+[sub_resource type="Environment" id="Environment_svm8j"]
+background_mode = 2
+sky = SubResource("Sky_uaaoc")
+ambient_light_source = 3
+ambient_light_color = Color(0.0627451, 0.0627451, 0.0627451, 1)
+ambient_light_sky_contribution = 0.0
+reflected_light_source = 2
+tonemap_mode = 2
+auto_exposure_enabled = true
+auto_exposure_scale = 0.2
+auto_exposure_speed = 2.0
+ssr_enabled = true
+ssao_enabled = true
+ssil_enabled = true
+fog_density = 0.0165
+
+[node name="WorldEnvironment" type="WorldEnvironment"]
+environment = SubResource("Environment_svm8j")
+script = ExtResource("1_33ls0")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
+shadow_enabled = true
+shadow_reverse_cull_face = true

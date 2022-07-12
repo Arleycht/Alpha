@@ -2,8 +2,7 @@ class_name Navigator
 extends Resource
 
 
-var world: World
-var character: Character
+var unit: Anthropoid
 
 var _path: Array
 var _path_index: int
@@ -12,12 +11,12 @@ var _prev_pos: Vector3
 
 
 func update() -> void:
-	if world == null or character == null:
+	if not unit.is_loaded():
 		return
 	
 	if not is_path_empty():
 		var target := get_position()
-		var close_enough := maxf(character.get_aabb().size.x, character.get_aabb().size.z)
+		var close_enough := maxf(unit.get_aabb().size.x, unit.get_aabb().size.z)
 		var last := (_path_index == _path.size() - 1)
 		
 		if last:
@@ -31,22 +30,22 @@ func update() -> void:
 		# that is blocked on one side, and adjust the waypoint to make the
 		# path and movement smoother
 		
-		# Move character
+		# Move unit
 		
-		var diff := target - character.position
+		var diff := target - unit.position
 		var h_diff := Plane.PLANE_XZ.project(diff)
-		character.wish_vector = h_diff.normalized() * clampf(h_diff.length(), 0.1, 1)
+		unit.wish_vector = h_diff.normalized() * clampf(h_diff.length(), 0.1, 1)
 		
-		if diff.y > character.jump_height * 0.75:
-			if h_diff.length_squared() < 2 and not character.is_jumping():
-				character.jump()
+		if diff.y > unit.jump_height * 0.75:
+			if h_diff.length_squared() < 2 and not unit.is_jumping():
+				unit.jump()
 		elif diff.y < -0.75 or last:
 			# Precision movement mode for descending and last waypoint
 			const speed_limit := 2.5
-			var speed := Plane.PLANE_XZ.project(character.velocity).length()
+			var speed := Plane.PLANE_XZ.project(unit.velocity).length()
 			
 			if speed > speed_limit:
-				character.wish_vector *= -1
+				unit.wish_vector *= -1
 		
 		# Increment path position
 		
@@ -54,15 +53,15 @@ func update() -> void:
 			increment_position()
 		
 		if Time.get_ticks_msec() - _prev_check_msec > 5000:
-			if (_prev_pos - character.position).length_squared() < 2.25:
+			if (_prev_pos - unit.position).length_squared() < 2.25:
 				_path.clear()
 			
 			_prev_check_msec = Time.get_ticks_msec()
-			_prev_pos = character.position
+			_prev_pos = unit.position
 
 
 func move_to(from: Vector3, to: Vector3) -> void:
-	if world == null or character == null:
+	if not unit.is_loaded():
 		return
 	
 	var from_i := Util.align_vector(from)
@@ -98,16 +97,16 @@ func is_path_empty() -> bool:
 
 
 func _is_valid_floor(pos: Vector3i) -> bool:
-	var voxel_id := world.get_voxel(pos)
+	var voxel_id: String = unit.get_world().get_voxel(pos)
 	# TODO: Get these from configuration, i.e. voxels tagged with something
 	# that says they are a valid floor voxel
-	return voxel_id in [1]
+	return voxel_id not in ["core:air"]
 
 
 func _is_valid_air(pos: Vector3i) -> bool:
-	var voxel_id := world.get_voxel(pos)
+	var voxel_id: String = unit.get_world().get_voxel(pos)
 	# TODO: Get these from configuration
-	return voxel_id in [0]
+	return voxel_id in ["core:air"]
 
 
 func _is_valid_standing_position(pos: Vector3i) -> bool:
@@ -134,7 +133,7 @@ func _heuristic(a: Vector3i, b: Vector3i) -> float:
 	return (b - a).length_squared() as float * 0.5
 
 
-func _is_traversal_clear(from: Vector3i, to: Vector3i) -> bool:
+func _is_traversal_clear(from: Vector3i, to: Vector3i, clearance_fn: Callable) -> bool:
 	var current := from
 	var delta := sign(to - from) as Vector3i
 	var dx = Vector3i(delta.x, 0, 0)
@@ -142,9 +141,9 @@ func _is_traversal_clear(from: Vector3i, to: Vector3i) -> bool:
 	var dz = Vector3i(0, 0, delta.z)
 	
 	while current != to:
-		if current.x != to.x and _is_valid_standing_position(current + dx):
+		if current.x != to.x and clearance_fn.call(current + dx):
 			current += dx
-		elif current.z != to.z and _is_valid_standing_position(current + dz):
+		elif current.z != to.z and clearance_fn.call(current + dz):
 			current += dz
 		elif current.y != to.y:
 			if delta.y > 0 and !_is_valid_air(current + dy):
@@ -180,7 +179,7 @@ func _pathfind(from: Vector3i, to: Vector3i,
 	# and use it as the origin instead
 	if not clearance_fn.call(from):
 		var found := false
-		var w := ceil(character.get_aabb().get_longest_axis_size()) as int
+		var w := ceil(unit.get_aabb().get_longest_axis_size()) as int
 		for i in range(-w, w + 1):
 			for j in range(-w, w + 1):
 				if clearance_fn.call(from + Vector3i(i, 0, j)):
@@ -194,7 +193,7 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		if not found:
 			return
 	
-	if not clearance_fn.call(to) or not world.is_position_loaded(to):
+	if not clearance_fn.call(to) or not unit.get_world().is_position_loaded(to):
 		return
 	
 	var open := [from]
@@ -235,10 +234,10 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		neighbors.shuffle()
 		
 		for n in neighbors:
-			if not world.is_position_loaded(n):
+			if not unit.get_world().is_position_loaded(n):
 				continue
 			
-			if not clearance_fn.call(n) or not _is_traversal_clear(current, n):
+			if not clearance_fn.call(n) or not _is_traversal_clear(current, n, clearance_fn):
 				continue
 			
 			var new_g_score = g_score[current] + cost_fn.call(current, n)

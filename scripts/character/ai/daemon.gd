@@ -14,7 +14,7 @@ func init(w: World) -> void:
 
 func spawn_anthropoid() -> Anthropoid:
 	var a: Anthropoid = load("res://scenes/anthropoid.tscn").instantiate()
-	a.init(self)
+	a.daemon = self
 	a.died.connect(_on_anthropoid_died)
 	
 	world.add_child(a)
