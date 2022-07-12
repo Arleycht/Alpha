@@ -54,7 +54,7 @@ public struct ImageEntry
     }
 }
 
-public partial class WorldLoader : Node3D
+public partial class WorldLoader : RefCounted
 {
     public VoxelBlockyLibrary Library { get; private set; }
     public Dictionary<string, Module> ModuleMap { get; private set; } = new Dictionary<string, Module>();

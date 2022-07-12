@@ -5,7 +5,7 @@ using System;
 public readonly struct RaycastResult
 {
     public readonly bool HasHit;
-    public readonly Node3D Hit;
+    public readonly Node3D Collider;
     public readonly Vector3 Position;
     public readonly Vector3 Normal;
     public readonly RID RID;
@@ -16,7 +16,7 @@ public readonly struct RaycastResult
         if (resultDict.Count <= 0)
         {
             HasHit = false;
-            Hit = null;
+            Collider = null;
             Position = new Vector3();
             Normal = new Vector3();
             RID = null;
@@ -25,7 +25,7 @@ public readonly struct RaycastResult
         else
         {
             HasHit = true;
-            Hit = (Node3D)resultDict["collider"];
+            Collider = (Node3D)resultDict["collider"];
             Position = (Vector3)resultDict["position"];
             Normal = (Vector3)resultDict["normal"];
             RID = (RID)resultDict["rid"];

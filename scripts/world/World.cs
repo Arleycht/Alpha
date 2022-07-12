@@ -3,31 +3,15 @@ using System.Collections.Generic;
 
 public partial class World : Node3D
 {
-    public delegate void BlockLoadedHandler(Vector3 bpos);
-    public delegate void BlockUnloadedHandler(Vector3 bpos);
-    public delegate void MeshBlockChangedHandler();
+    [Signal]
+    public delegate void BlockLoaded(Vector3 bpos);
+    [Signal]
+    public delegate void BlockUnloaded(Vector3 bpos);
+    [Signal]
+    public delegate void MeshBlockChanged();
 
-    [Signal]
-    public event BlockLoadedHandler BlockLoaded
-    {
-        add => Connect(nameof(BlockLoaded), new Callable(value));
-        remove => Disconnect(nameof(BlockLoaded), new Callable(value));
-    }
-    [Signal]
-    public event BlockUnloadedHandler BlockUnloaded
-    {
-        add => Connect(nameof(BlockUnloaded), new Callable(value));
-        remove => Disconnect(nameof(BlockUnloaded), new Callable(value));
-    }
-    [Signal]
-    public event MeshBlockChangedHandler MeshBlockChanged
-    {
-        add => Connect(nameof(MeshBlockChanged), new Callable(value));
-        remove => Disconnect(nameof(MeshBlockChanged), new Callable(value));
-    }
-
-    private WorldLoader loader;
-    private VoxelStreamSQLite stream;
+    private WorldLoader Loader;
+    private VoxelStreamSQLite Stream;
 
     public VoxelTerrain Terrain;
     public VoxelTool Tool;
@@ -36,8 +20,8 @@ public partial class World : Node3D
 
     public override void _Ready()
     {
-        loader = new WorldLoader();
-        loader.Load();
+        Loader = new WorldLoader();
+        Loader.Load();
 
         // Begin test resources
 
@@ -47,11 +31,11 @@ public partial class World : Node3D
         generator.HeightStart = -25;
         generator.HeightRange = 50;
 
-        stream = new VoxelStreamSQLite();
-        stream.DatabasePath = "user://test.world";
+        Stream = new VoxelStreamSQLite();
+        Stream.DatabasePath = "user://test.world";
 
         VoxelMesherBlocky mesher = new VoxelMesherBlocky();
-        mesher.Library = loader.Library;
+        mesher.Library = Loader.Library;
 
         // End test resources
 
@@ -80,7 +64,7 @@ public partial class World : Node3D
 
     public bool SetVoxel(Vector3i pos, string name)
     {
-        if (!loader.IdMap.ContainsKey(name))
+        if (!Loader.IdMap.ContainsKey(name))
         {
             return false;
         }
@@ -90,14 +74,14 @@ public partial class World : Node3D
             return false;
         }
 
-        Tool.SetVoxel(pos, loader.IdMap[name]);
+        Tool.SetVoxel(pos, Loader.IdMap[name]);
 
         return true;
     }
 
     public string GetVoxel(Vector3i pos)
     {
-        return loader.NameMap[Tool.GetVoxel(pos)];
+        return Loader.NameMap[Tool.GetVoxel(pos)];
     }
 
     public bool IsOutOfBounds(Vector3 pos)

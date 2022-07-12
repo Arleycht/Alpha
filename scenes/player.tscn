@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://cvwd8d31qsp3a"]
+[gd_scene load_steps=10 format=3 uid="uid://cvwd8d31qsp3a"]
 
 [ext_resource type="Script" path="res://scripts/player/Player.cs" id="1_0d014"]
 [ext_resource type="Shader" path="res://shaders/palette.gdshader" id="1_k0fqw"]
 [ext_resource type="Texture2D" uid="uid://70g42gr6aelk" path="res://palettes/bw.png" id="2_og2vy"]
+[ext_resource type="Script" path="res://scripts/player/PlayerControl.cs" id="2_xw21j"]
 [ext_resource type="Shader" path="res://shaders/pixelate.gdshader" id="3_gtbil"]
 [ext_resource type="Script" path="res://scripts/player/CameraController.cs" id="3_ie8ef"]
 [ext_resource type="Theme" uid="uid://by1kcdusj80r5" path="res://themes/default.tres" id="3_nyme8"]
@@ -28,6 +29,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+script = ExtResource("2_xw21j")
 
 [node name="PanelContainer" type="PanelContainer" parent="HUD"]
 anchor_left = 1.0

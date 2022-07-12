@@ -23,17 +23,11 @@ _global_script_classes=[{
 "class": &"Daemon",
 "language": &"GDScript",
 "path": "res://scripts/character/ai/daemon.gd"
-}, {
-"base": "Resource",
-"class": &"Navigator",
-"language": &"GDScript",
-"path": "res://scripts/character/ai/navigator.gd"
 }]
 _global_script_class_icons={
 "Anthropoid": "",
 "Character": "",
-"Daemon": "",
-"Navigator": ""
+"Daemon": ""
 }
 
 [application]
@@ -44,6 +38,10 @@ config/use_custom_user_dir=true
 config/custom_user_dir_name="project_alpha"
 config/features=PackedStringArray("4.0", "C#", "Vulkan Clustered")
 config/icon="res://icon.png"
+
+[autoload]
+
+WorldManager="*res://scripts/world/WorldManager.cs"
 
 [debug]
 

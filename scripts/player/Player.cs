@@ -2,27 +2,10 @@ using Godot;
 
 public partial class Player : Node3D
 {
-    public delegate void WorldChangedHandler();
-
     [Signal]
-    public event WorldChangedHandler WorldChanged
-    {
-        add { Connect(nameof(WorldChanged), value); }
-        remove { Disconnect(nameof(WorldChanged), value); }
-    }
-
-    public World World
-    {
-        get
-        {
-            return World;
-        }
-        set
-        {
-            EmitSignal(nameof(WorldChanged), value);
-            World = value;
-        }
-    }
+    public delegate void WorldChanged();
+    
+    public World World { get; private set; }
     public Daemon Daemon { get; private set; }
 
     public override void _Ready()
@@ -32,5 +15,11 @@ public partial class Player : Node3D
             Name = "PlayerDaemon"
         };
         AddChild(Daemon);
+    }
+
+    public void SetWorld(World world)
+    {
+        World = world;
+        EmitSignal(nameof(WorldChanged));
     }
 }
