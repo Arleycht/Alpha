@@ -10,16 +10,36 @@ public partial class WorldManager : Node
 
     public World World { get; private set; }
 
+    private bool IsQuitting = false;
+    private uint QuittingFrames = 0;
+
     public override void _Ready()
     {
+        GetTree().AutoAcceptQuit = false;
         CallDeferred(nameof(InitializeWorld));
     }
 
-    public override void _Notification(int what)
+    public override void _Process(float delta)
     {
-        if (what == NotificationWmCloseRequest)
+        if (IsQuitting)
         {
-            
+            if (QuittingFrames++ > 10)
+            {
+                GetTree().Quit();
+            }
+        }
+    }
+
+    async public override void _Notification(int what)
+    {
+        switch ((long)what)
+        {
+            case NotificationWmCloseRequest:
+                World.PropagateCall("_Quit");
+                World.QueueFree();
+                await ToSignal(World, "tree_exited");
+                IsQuitting = true;
+                break;
         }
     }
 
