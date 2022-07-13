@@ -65,13 +65,13 @@ func _input(event: InputEvent) -> void:
 		var r := Util.physics_cast_from_screen(get_camera())
 		
 		if r.collider != null:
-			if r.collider is Anthropoid:
+			if r.collider is Unit:
 				selection.append(r.collider)
 				selection_changed.emit()
 				get_viewport().set_input_as_handled()
 			elif Input.is_action_pressed("control"):
-				var anthropoid := daemon.spawn_anthropoid()
-				anthropoid.global_transform.origin = r.position
+				var unit := daemon.spawn_unit()
+				unit.global_transform.origin = r.position
 				get_viewport().set_input_as_handled()
 	elif event.is_action_released("secondary"):
 		var result := Util.voxel_cast_from_screen(world, get_camera())
@@ -82,7 +82,7 @@ func _input(event: InputEvent) -> void:
 			pos += Vector3i(0, 1, 0)
 			
 			for c in selection:
-				if c is Anthropoid:
+				if c is Unit:
 					c.move_to(pos)
 			
 			get_viewport().set_input_as_handled()

@@ -24,7 +24,7 @@ func update_task(daemon: Daemon, delta: float) -> void:
 	pass
 
 
-func work(daemon: Daemon, anthropoid: Anthropoid) -> void:
+func work(daemon: Daemon, unit: Unit) -> void:
 	var i = randi_range(0, _positions.size() - 1)
 	var pos = _positions.pop_at(i) as Vector3i
 	daemon.world.set_voxel(pos, "core:air")

@@ -2,7 +2,7 @@ class_name Navigator
 extends Resource
 
 
-var unit: Anthropoid
+var unit: Unit
 
 var _path: Array
 var _path_index: int

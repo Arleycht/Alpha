@@ -1,10 +1,10 @@
-class_name Anthropoid
+class_name Unit
 extends Character
 
 
 signal died
 
-@export var first_name: String = "Anthropoid"
+@export var first_name: String = "Unit"
 @export var nickname: String = ""
 @export var last_name: String = "Alpha"
 
