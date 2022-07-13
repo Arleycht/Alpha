@@ -41,6 +41,7 @@ func _load() -> void:
 			else:
 				def['name'] = voxel_name
 				voxel_definitions[voxel_name] = def
+				print("Loaded \"%s\"" % voxel_name)
 			
 			for side in def['textures']:
 				var file_name: String = def['textures'][side]
@@ -48,19 +49,21 @@ func _load() -> void:
 				var texture_id: String
 				
 				if File.file_exists(path):
-					print("Loaded \"%s\"" % path)
 					texture_id = "%s/%s" % [module_name, path.get_file()]
 				else:
-					printerr("Failed to find \"%s\"" % path)
 					path = Constants.DEFAULT_TEXTURE_PATH
 					texture_id = Constants.DEFAULT_TEXTURE_ID
+					printerr("Failed to find \"%s\"" % path)
 				
-				var image := _load_image(path)
 				def['textures'][side] = texture_id
-				atlas_map[texture_id] = {
-					'image': image,
-					'rect': Rect2i(0, 0, image.get_width(), image.get_height()),
-				}
+				
+				if texture_id not in atlas_map:
+					var image := _load_image(path)
+					atlas_map[texture_id] = {
+						'image': image,
+						'rect': Rect2i(0, 0, image.get_width(), image.get_height()),
+					}
+					print("Loaded \"%s\"" % path)
 	
 	# Stitch textures
 	
@@ -108,6 +111,68 @@ func _load() -> void:
 	
 	library.bake()
 	loaded.emit()
+
+
+func _load_modules() -> Dictionary:
+	var modules := {}
+	
+	var module_paths := [Constants.CORE_MODULE_PATH]
+	var dir := Directory.new()
+	
+	if dir.open(Constants.MODULES_PATH) == OK:
+		for module_name in dir.get_directories():
+			module_paths.append(dir.get_current_dir() + "/" + module_name)
+	
+	for module_path in module_paths:
+		var module_name := str(module_path).split('/')[-1]
+		var load_order := 0
+		var config := ConfigFile.new()
+		var definitions := []
+		
+		if dir.open(module_path) != OK:
+			printerr("Failed to load module at \"%s\"" % module_path)
+			continue
+		
+		if config.load(dir.get_current_dir() + "/module.cfg") == OK:
+			module_name = config.get_value("load", "name", module_name) as String
+			load_order = config.get_value("load", "load_order", 1) as int
+		
+		dir.change_dir("definitions")
+		
+		for def_name in dir.get_files():
+			if def_name.to_lower().ends_with(".json"):
+				var def_path := dir.get_current_dir() + "/%s" % def_name
+				var def := _load_definition_file(def_path)
+				
+				if not def.is_empty():
+					definitions.append(def)
+		
+		modules[module_name] = {
+			'path': module_path,
+			'load_order': load_order,
+			'config': config,
+			'definitions': definitions,
+		}
+	
+	return modules
+
+
+func _load_image(path: String) -> Image:
+	var img := Image.new()
+	
+	if path.begins_with("res://"):
+		var t: Variant = load(path)
+		
+		if t is Texture2D:
+			img = t.get_image()
+		else:
+			img.load(Constants.DEFAULT_TEXTURE_PATH)
+	else:
+		img.load(path)
+	
+	img.convert(Image.FORMAT_RGBA8)
+	
+	return img
 
 
 func _pack_atlas(atlas_map: Dictionary, padding: int = 2) -> Vector2i:
@@ -158,50 +223,6 @@ func _pack_atlas(atlas_map: Dictionary, padding: int = 2) -> Vector2i:
 	return size + Vector2i.ONE * padding
 
 
-func _load_modules() -> Dictionary:
-	var modules := {}
-	
-	var module_paths := [Constants.CORE_MODULE_PATH]
-	var dir := Directory.new()
-	
-	if dir.open(Constants.MODULES_PATH) == OK:
-		for module_name in dir.get_directories():
-			module_paths.append(dir.get_current_dir() + "/" + module_name)
-	
-	for module_path in module_paths:
-		var module_name := str(module_path).split('/')[-1]
-		var load_order := 0
-		var config := ConfigFile.new()
-		var definitions := []
-		
-		if dir.open(module_path) != OK:
-			printerr("Failed to load module at \"%s\"" % module_path)
-			continue
-		
-		if dir.file_exists("module"):
-			config.load(dir.get_current_dir() + "/module")
-			load_order = config.get_section_key("load", "load_order", 1) as int
-		
-		dir.change_dir("definitions")
-		
-		for def_name in dir.get_files():
-			if def_name.to_lower().ends_with(".json"):
-				var def_path := dir.get_current_dir() + "/%s" % def_name
-				var def := _load_definition_file(def_path)
-				
-				if not def.is_empty():
-					definitions.append(def)
-		
-		modules[module_name] = {
-			'path': module_path,
-			'load_order': load_order,
-			'config': config,
-			'definitions': definitions,
-		}
-	
-	return modules
-
-
 func _load_definition_file(file_path: String) -> Dictionary:
 	var file := File.new()
 	var file_data: String
@@ -219,24 +240,6 @@ func _load_definition_file(file_path: String) -> Dictionary:
 		return data as Dictionary
 	
 	return {}
-
-
-func _load_image(path: String) -> Image:
-	var img := Image.new()
-	
-	if path.begins_with("res://"):
-		var t: Variant = load(path)
-		
-		if t is Texture2D:
-			img = t.get_image()
-		else:
-			img.load(Constants.DEFAULT_TEXTURE_PATH)
-	else:
-		img.load(path)
-	
-	img.convert(Image.FORMAT_RGBA8)
-	
-	return img
 
 
 func _map_uv(rect: Rect2i, atlas_size: Vector2):
