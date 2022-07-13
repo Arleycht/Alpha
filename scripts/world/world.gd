@@ -14,6 +14,7 @@ var terrain: VoxelTerrain
 var tool: VoxelToolTerrain
 
 var _loaded_blocks := {}
+var _last_save_ticks := Time.get_ticks_msec()
 
 
 func _ready() -> void:
@@ -69,6 +70,10 @@ func _notification(what):
 func _physics_process(delta: float) -> void:
 	var env := $WorldEnvironment as EnvironmentManager
 	env.time += delta / 60.0
+	
+	if Time.get_ticks_msec() - _last_save_ticks > 5 * 60 * 1000:
+		terrain.save_modified_blocks()
+		_last_save_ticks = Time.get_ticks_msec()
 
 
 func set_voxel(pos: Vector3i, voxel_name: String) -> bool:
