@@ -11,6 +11,15 @@ var _player_scene = preload("res://scenes/player.tscn")
 
 func _ready() -> void:
 	call_deferred("load_world")
+	
+	get_tree().auto_accept_quit = false
+
+
+func _notification(what: int):
+	match what:
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			print("Exiting")
+			get_tree().quit()
 
 
 func load_world() -> void:
