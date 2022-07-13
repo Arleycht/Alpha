@@ -22,6 +22,7 @@ func _ready() -> void:
 	await _loader.loaded
 	
 	_stream = VoxelStreamSQLite.new()
+	_stream.database_path = OS.get_user_data_dir() + "/test.db"
 	
 	# Test generator
 	var generator := VoxelGeneratorNoise2D.new()
@@ -44,6 +45,7 @@ func _ready() -> void:
 	var size := Vector3(1, 0, 1) * world_size * Constants.BLOCK_SIZE
 	size.y = abs(max_height - min_height)
 	
+	terrain.stream = _stream
 	terrain.mesher = mesher
 	terrain.generator = generator
 	terrain.max_view_distance = 256
@@ -57,6 +59,11 @@ func _ready() -> void:
 	terrain.block_unloaded.connect(_on_block_unloaded)
 	terrain.mesh_block_loaded.connect(_on_mesh_block_loaded)
 	terrain.mesh_block_unloaded.connect(_on_mesh_block_unloaded)
+
+
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		terrain.save_modified_blocks()
 
 
 func _physics_process(delta: float) -> void:
