@@ -104,7 +104,7 @@ func is_position_loaded(pos: Vector3) -> bool:
 		
 		var empty := true
 		
-		Util.for_each_cell(bpos, func(pos: Vector3i):
+		Util.for_each_cell_in_block(bpos, func(pos: Vector3i):
 			if tool.get_voxel(pos) != 0:
 				empty = false
 				return true
@@ -125,9 +125,11 @@ func _deferred_mesh_update(bpos: Vector3i, loaded: bool) -> void:
 
 
 func _on_block_loaded(bpos: Vector3i) -> void:
-	Util.for_each_cell(bpos, func(pos: Vector3i):
-		if get_voxel(pos) != "core:air" and get_voxel(pos + Vector3i(0, 1, 0)) == "core:air":
+	Util.for_each_cell_in_block(bpos, func(pos: Vector3i):
+		if get_voxel(pos) == "core:dirt" and get_voxel(pos + Vector3i(0, 1, 0)) == "core:air":
 			set_voxel(pos, "core:grass")
+		elif get_voxel(pos) == "core:grass" and get_voxel(pos + Vector3i(0, 1, 0)) != "core:air":
+			set_voxel(pos, "core:dirt")
 	)
 	
 	if bpos not in _loaded_blocks:

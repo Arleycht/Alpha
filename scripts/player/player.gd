@@ -9,9 +9,10 @@ var world: World
 var daemon: Daemon
 
 var current_tool: Variant
+var current_priority: int = 5
 var selection: Array[Node] = []
 
-var _object_markers: Array
+var _markers := {}
 var _marker_scene := preload("res://scenes/marker.tscn")
 
 
@@ -24,6 +25,7 @@ func _ready() -> void:
 	for button in _get_mode_buttons():
 		button.pressed.connect(_on_button_pressed.bind(button))
 	
+	selection_changed.connect(_update_markers)
 	tool_changed.connect(_update_buttons)
 
 
@@ -58,14 +60,14 @@ func _input(event: InputEvent) -> void:
 	
 	if event.is_action_pressed("primary"):
 		if not Input.is_action_pressed("control"):
-			selection.clear()
+			clear_selection()
 		
 		var r := Util.physics_cast_from_screen(get_camera())
 		
 		if r.collider != null:
 			if r.collider is Anthropoid:
 				selection.append(r.collider)
-				_mark(r.collider)
+				selection_changed.emit()
 				get_viewport().set_input_as_handled()
 			elif Input.is_action_pressed("control"):
 				var anthropoid := daemon.spawn_anthropoid()
@@ -86,13 +88,6 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
-func is_tool(tool: Variant) -> bool:
-	if tool != null and 'INTERACTION_TOOL' in tool:
-		return true
-	
-	return false
-
-
 func clear_tool() -> void:
 	current_tool = null
 	tool_changed.emit()
@@ -100,8 +95,6 @@ func clear_tool() -> void:
 
 func clear_selection() -> void:
 	selection.clear()
-	_object_markers.map(func(x: Node): x.queue_free())
-	_object_markers.clear()
 	selection_changed.emit()
 
 
@@ -113,10 +106,24 @@ func get_camera_position() -> Vector3:
 	return $"Camera3D".global_transform.origin as Vector3
 
 
-func _mark(character: Character) -> void:
+func _update_markers() -> void:
+	var nodes := _markers.keys()
+	
+	for node in nodes:
+		if not is_instance_valid(node) or node not in selection:
+			_markers[node].queue_free()
+			_markers.erase(node)
+	
+	for node in selection:
+		if node not in _markers:
+			_mark(node)
+
+
+func _mark(node: Node) -> void:
 	var marker := _marker_scene.instantiate()
-	character.add_child(marker)
-	_object_markers.append(marker)
+	node.add_child(marker)
+	marker.transform.origin.y = 1
+	_markers[node] = marker
 
 
 func _get_mode_buttons() -> Array:
@@ -150,3 +157,10 @@ func _on_button_pressed(button: Button) -> void:
 			current_tool = tool
 		
 		tool_changed.emit(tool)
+
+
+static func is_tool(tool: Variant) -> bool:
+	if tool != null and 'INTERACTION_TOOL' in tool:
+		return true
+	
+	return false

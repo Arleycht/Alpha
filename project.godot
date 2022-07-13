@@ -29,10 +29,15 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://scripts/character/character.gd"
 }, {
-"base": "Node3D",
+"base": "Node",
 "class": &"Daemon",
 "language": &"GDScript",
 "path": "res://scripts/character/ai/daemon.gd"
+}, {
+"base": "Resource",
+"class": &"DigTask",
+"language": &"GDScript",
+"path": "res://scripts/character/ai/task/dig_task.gd"
 }, {
 "base": "Control",
 "class": &"DigTool",
@@ -70,6 +75,7 @@ _global_script_class_icons={
 "CameraController": "",
 "Character": "",
 "Daemon": "",
+"DigTask": "",
 "DigTool": "",
 "EnvironmentManager": "",
 "Navigator": "",

@@ -24,9 +24,17 @@ func use(player: Player, event: InputEvent) -> bool:
 				_end = pos
 				
 				var aabb := Util.get_aabb(_start, _end)
+				var positions := []
 				
-				player.world.tool.value = player.world._loader.id_map["core:air"]
-				player.world.tool.do_box(aabb.position, aabb.end)
+				Util.for_each_cell(aabb, func(pos):
+					positions.append(pos)
+					print(pos)
+				)
+				
+				print(positions)
+				
+				var task := DigTask.new(player.current_priority, positions)
+				player.daemon.add_task(task)
 			
 			return true
 	

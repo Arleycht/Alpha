@@ -8,28 +8,43 @@ static func align_vector(v: Vector3) -> Vector3i:
 ## Returns the AABB that describes the volume between u and v
 static func get_aabb(u: Vector3i, v: Vector3i) -> AABB:
 	var size: Vector3i = abs(v - u)
-	var pos: Vector3i = get_min_axes(u, v)
+	var pos: Vector3i = get_min_pos(u, v)
 	return AABB(pos, size)
 
 
-static func get_min_axes(u: Vector3i, v: Vector3i) -> Vector3i:
+static func get_min_pos(u: Vector3i, v: Vector3i) -> Vector3i:
 	return Vector3i(min(u.x, v.x), min(u.y, v.y), min(u.z, v.z))
 
 
-static func get_max_axes(u: Vector3i, v: Vector3i) -> Vector3i:
+static func get_max_pos(u: Vector3i, v: Vector3i) -> Vector3i:
 	return Vector3i(max(u.x, v.x), max(u.y, v.y), max(u.z, v.z))
+
+
+## Calls the function f over all cell positions in a given AABB.
+## Loop can be broken early if f returns true.
+static func for_each_cell(aabb: AABB, f: Callable) -> void:
+	var start := align_vector(aabb.position)
+	var end := align_vector(aabb.end)
+	
+	for j in end.y - start.y + 1:
+		for i in end.x - start.x + 1:
+			for k in end.z - start.z + 1:
+				if f.call(start + Vector3i(i, j, k)):
+					return
 
 
 ## Calls the function f over all cell positions in a given block.
 ## Loop can be broken early if f returns true.
-static func for_each_cell(bpos: Vector3i, f: Callable) -> void:
-	var origin := bpos * Constants.BLOCK_SIZE
+static func for_each_cell_in_block(bpos: Vector3i, f: Callable) -> void:
+	var pos := bpos * Constants.BLOCK_SIZE
+	var size := Vector3i.ONE * Constants.BLOCK_SIZE
+	for_each_cell(AABB(pos, size), f)
 	
-	for j in Constants.BLOCK_SIZE:
-		for i in Constants.BLOCK_SIZE:
-			for k in Constants.BLOCK_SIZE:
-				if f.call(origin + Vector3i(i, j, k)):
-					return
+#	for j in Constants.BLOCK_SIZE:
+#		for i in Constants.BLOCK_SIZE:
+#			for k in Constants.BLOCK_SIZE:
+#				if f.call(origin + Vector3i(i, j, k)):
+#					return
 
 
 static func raycast(world3d: World3D, from: Vector3, to: Vector3) -> Dictionary:
