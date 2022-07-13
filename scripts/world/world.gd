@@ -18,9 +18,10 @@ var _loaded_blocks := {}
 
 func _ready() -> void:
 	_loader = WorldLoader.new()
-	_stream = VoxelStreamSQLite.new()
 	
-#	_stream.database_path = 
+	await _loader.loaded
+	
+	_stream = VoxelStreamSQLite.new()
 	
 	# Test generator
 	var generator := VoxelGeneratorNoise2D.new()

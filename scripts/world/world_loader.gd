@@ -1,6 +1,8 @@
 class_name WorldLoader
-extends Object
+extends Node
 
+
+signal loaded
 
 var library: VoxelBlockyLibrary
 var materials: Array
@@ -13,7 +15,7 @@ var atlas_texture: ImageTexture
 
 
 func _init() -> void:
-	_load()
+	call_deferred("_load")
 
 
 func _load() -> void:
@@ -105,6 +107,7 @@ func _load() -> void:
 		voxel.set_material_override(0, default_material)
 	
 	library.bake()
+	loaded.emit()
 
 
 func _pack_atlas(atlas_map: Dictionary, padding: int = 2) -> Vector2i:

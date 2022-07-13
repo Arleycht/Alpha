@@ -8,10 +8,6 @@ var _anthropoids = []
 var _task_queue = []
 
 
-func init(w: World) -> void:
-	world = w
-
-
 func spawn_anthropoid() -> Anthropoid:
 	var a: Anthropoid = load("res://scenes/anthropoid.tscn").instantiate()
 	a.daemon = self

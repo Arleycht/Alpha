@@ -32,40 +32,50 @@ static func for_each_cell(bpos: Vector3i, f: Callable) -> void:
 					return
 
 
-static func physics_cast(camera: Camera3D,
-		max_distance: float = 100.0) -> PhysicsRaycastResult:
-	var params := _get_raycast_params(camera)
-	var origin: Vector3 = params[0]
-	var to: Vector3 = params[1] * max_distance
-	var result := PhysicsRaycastResult.new()
+static func raycast(world3d: World3D, from: Vector3, to: Vector3) -> Dictionary:
 	var result_dict := {}
 	var query_params := PhysicsRayQueryParameters3D.new()
-	query_params.from = origin
-	query_params.to = origin + to
-	result_dict = camera.get_world_3d().direct_space_state.intersect_ray(query_params)
+	query_params.from = from
+	query_params.to = from + to
+	result_dict = world3d.direct_space_state.intersect_ray(query_params)
 	
 	if result_dict.is_empty():
-		return null
-	
-	result.collider = result_dict['collider']
-	result.normal = result_dict['normal']
-	result.position = result_dict['position']
-	result.rid = result_dict['rid']
-	result.shape = result_dict['shape']
-	
-	return result
+		return {
+			'collider': null,
+			'normal': Vector3.ZERO,
+			'position': to,
+			'rid': null,
+			'shape': null,
+		}
+	else:
+		return result_dict
 
 
-static func voxel_cast(camera: Camera3D, world: World,
-		max_distance: float = 100.0) -> VoxelRaycastResult:
-	var params := _get_raycast_params(camera)
-	var origin: Vector3 = params[0]
-	var to: Vector3 = params[1] * max_distance
-	return world.tool.raycast(origin, to.normalized(), to.length())
-
-
-static func _get_raycast_params(camera: Camera3D) -> Array:
+static func physics_cast_from_screen(camera: Camera3D,
+		max_distance: float = 100.0) -> Dictionary:
 	var mouse_pos := camera.get_viewport().get_mouse_position()
-	var origin := camera.project_ray_origin(mouse_pos)
+	var from := camera.project_ray_origin(mouse_pos)
 	var direction := camera.project_ray_normal(mouse_pos)
-	return [origin, direction]
+	var to: Vector3 = direction * max_distance
+	return raycast(camera.get_world_3d(), from, to)
+
+
+static func voxel_cast_from_screen(world: World, camera: Camera3D,
+		max_distance: float = 100.0) -> Dictionary:
+	var mouse_pos := camera.get_viewport().get_mouse_position()
+	var from := camera.project_ray_origin(mouse_pos)
+	var direction := camera.project_ray_normal(mouse_pos)
+	var result := world.tool.raycast(from, direction, max_distance)
+	
+	if result == null:
+		return {
+			'hit': false,
+			'previous_position': align_vector(from),
+			'position': align_vector(direction * max_distance),
+		}
+	else:
+		return {
+			'hit': true,
+			'previous_position': result.previous_position,
+			'position': result.position,
+		}
