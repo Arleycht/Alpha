@@ -253,14 +253,14 @@ func _map_uv(rect: Rect2i, atlas_size: Vector2):
 
 func _build_cube_mesh(textures: Dictionary) -> ArrayMesh:
 	var vertices := [
+		Vector3(0, 0, 0),
 		Vector3(1, 0, 0),
 		Vector3(1, 0, 1),
 		Vector3(0, 0, 1),
-		Vector3(0, 0, 0),
+		Vector3(0, 1, 0),
 		Vector3(1, 1, 0),
 		Vector3(1, 1, 1),
 		Vector3(0, 1, 1),
-		Vector3(0, 1, 0),
 	]
 	
 	var normals := [
