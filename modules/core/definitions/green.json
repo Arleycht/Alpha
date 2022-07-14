@@ -1,0 +1,6 @@
+{
+	"name": "green",
+	"textures": {
+		"all": "kenney/Green/texture_08.png",
+	}
+}

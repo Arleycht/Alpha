@@ -71,7 +71,16 @@ func move_to(from: Vector3, to: Vector3) -> void:
 	
 	var from_i := Util.align_vector(from)
 	var to_i := Util.align_vector(to)
+	
+	print(" ----- Profiling results: -----")
+	
+	var w := Stopwatch.new()
+	w.start("Pathfinding")
+	
 	_a_star(from_i, to_i)
+	
+	w.stop()
+	w.print_times()
 
 
 func move_to_adjacent(from: Vector3, to: Vector3) -> void:
@@ -102,10 +111,6 @@ func is_path_empty() -> bool:
 	return _path.size() < 1 or _path_index > _path.size() - 1
 
 
-func _is_standable(pos: Vector3) -> bool:
-	return world.has_floor(pos) and not world.is_collidable(pos)
-
-
 func get_standable_neighbors(pos: Vector3i) -> Array:
 	var neighbors := []
 	
@@ -114,7 +119,7 @@ func get_standable_neighbors(pos: Vector3i) -> Array:
 			for k in range(-1, 2):
 				var n := pos + Vector3i(i, j, k)
 				
-				if _is_standable(n):
+				if world.has_floor(n):
 					neighbors.append(n)
 	
 	return neighbors
@@ -185,34 +190,142 @@ func _heuristic(a: Vector3i, b: Vector3i) -> float:
 func _get_neighbors(pos: Vector3i) -> Array:
 	var neighbors := []
 	
-	for i in range(-1, 2):
-		for j in range(-1, 2):
+	for j in range(-1, 2):
+		for i in range(-1, 2):
 			for k in range(-1, 2):
 				if i == 0 and j == 0 and k == 0:
 					continue
-				
+
 				neighbors.append(pos + Vector3i(i, j, k))
 	
 	return neighbors
 
 
-func _is_accessible(from: Vector3i, to: Vector3i) -> bool:
-	var explored := []
+func _get_open_set(from: Vector3i, to: Vector3i) -> Array:
+	var explored := {from: true}
 	var queue := [from]
+	var found := false
+	
+	var w := Stopwatch.new()
+	var w2 := Stopwatch.new()
+	
+	w.start("Flood fill")
 	
 	while queue.size() > 0:
-		for n in _get_neighbors(queue.pop_back()):
-			if n == to:
-				return true
-			elif world.has_floor(n) and n not in explored:
-				queue.append(n)
-				explored.append(n)
+		var neighbors := _get_neighbors(queue.pop_back())
+		
+		if to in neighbors:
+			explored[to] = true
+			found = true
+			break
+		else:
+			w2.start()
+			neighbors = neighbors.filter(func(x): return not x in explored and world.has_floor(x))
+			neighbors.map(func(x):
+				queue.append(x)
+				explored[x] = true
+			)
+			w2.stop()
+	
+	var open_set := []
+	
+	if found:
+		open_set = explored.keys()
+		open_set.sort_custom(func(a, b):
+			return _heuristic(a, to) < _heuristic(b, to)
+		)
+	
+	w2.print_average()
+	
+	w.stop()
+	w.print_times()
+	
+	return open_set
+
+
+func _is_accessible(from: Vector3i, to: Vector3i) -> bool:
+	print("Islands: %d" % world.islands.size())
+	
+	# DEBUG CODE
+	
+#	var _l = [
+#		"core:red", "core:light", "core:purple", "core:green", "core:orange",
+#	]
+#	seed(Time.get_ticks_usec())
+#	var _i = randi_range(0, _l.size() - 1)
+#	for island in world.islands:
+#		for pos in island:
+#			world.set_voxel(pos + Vector3i.DOWN, _l[_i])
+#		_i = wrapi(_i + 1, 0, _l.size())
+	
+	# END DEBUG CODE
+	
+	var from_island
+	var to_island
+	
+#	for island in world.islands:
+#		if from in island:
+#			from_island = island
+#
+#		if to in island:
+#			to_island = island
+#
+#		if from_island != null and to_island != null:
+#			break
+	
+	var from_bpos := Util.get_block_pos(from)
+	var to_bpos := Util.get_block_pos(to)
+
+	for i in world.island_map[from_bpos]:
+		if from in i:
+			from_island = i
+			break
+
+	for i in world.island_map[to_bpos]:
+		if to in i:
+			to_island = i
+			break
+	
+	if from_island == null or to_island == null:
+		print("Can't find islands for given positions")
+		return false
+	elif from_island == to_island:
+		print("Same island")
+		return true
+	
+	# Early detection
+#	for connected_group in world.connected_islands:
+#		if from_island in connected_group and to_island in connected_group:
+#			return true
+#		elif from_island in connected_group or to_island in connected_group:
+#			return false
+	
+	var explored := {from_island: true}
+	var queue := [from_island]
+	
+	while queue.size() > 0:
+		var current = queue.pop_back()
+		var neighbors = []
+		
+		for n in _get_neighbors(Util.get_block_pos(current.keys()[0])):
+			if n in world.island_map:
+				neighbors.append_array(world.island_map[n])
+		
+		for island in neighbors:
+			if not island in explored and world.is_island_connected(current, island):
+				if island == to_island:
+					return true
+				
+				queue.append(island)
+				explored[island] = true
+	
+	print("Inaccessible")
 	
 	return false
 
 
 func _a_star(from: Vector3i, to: Vector3i,
-		clearance_fn: Callable = _is_standable, cost_fn: Callable = _cost,
+		clearance_fn: Callable = world.has_floor, cost_fn: Callable = _cost,
 		heuristic_fn: Callable = _heuristic, adjacent: bool = false) -> void:
 	# If the character is standing over an invalid position, but is actually
 	# standing on the edge of a valid position, try to find the valid position
@@ -239,10 +352,16 @@ func _a_star(from: Vector3i, to: Vector3i,
 	if not _is_accessible(from, to):
 		return
 	
+	var w := Stopwatch.new()
+	w.start("Island pathfinding")
+	
 	var open := [from]
 	var map := {}
 	var g_score := {}
 	var f_score := {}
+	
+	w.stop()
+	w.print_times()
 	
 	g_score[from] = 0.0
 	f_score[from] = heuristic_fn.call(from, to)
@@ -269,13 +388,13 @@ func _a_star(from: Vector3i, to: Vector3i,
 		open.erase(current)
 		
 		var neighbors = _get_neighbors(current)
+		neighbors = neighbors.filter(func(x):
+			return world.is_position_loaded(x) and _is_traversable(current, x, clearance_fn)
+		)
 		neighbors.shuffle()
 		
 		for n in neighbors:
-			if not unit.world.is_position_loaded(n):
-				continue
-			
-			if not clearance_fn.call(n) or not _is_traversable(current, n, clearance_fn):
+			if not clearance_fn.call(n):
 				continue
 			
 			var new_g_score = g_score[current] + cost_fn.call(current, n)

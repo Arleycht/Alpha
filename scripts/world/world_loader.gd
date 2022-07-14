@@ -55,7 +55,7 @@ func load_definitions() -> void:
 				var texture_id: String
 				
 				if File.file_exists(path):
-					texture_id = "%s/%s" % [module_name, path.get_file()]
+					texture_id = "%s/%s" % [module_name, path]
 				else:
 					path = Constants.DEFAULT_TEXTURE_PATH
 					texture_id = Constants.DEFAULT_TEXTURE_ID
@@ -83,6 +83,7 @@ func load_definitions() -> void:
 		atlas_image.blit_rect(atlas_map[texture_id]['image'], src_rect, dst)
 	
 	atlas_texture = ImageTexture.create_from_image(atlas_image)
+	atlas_image.save_png("res://.temp/test.png")
 	
 	# Create material
 	

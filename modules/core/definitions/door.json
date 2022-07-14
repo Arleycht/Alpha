@@ -1,0 +1,9 @@
+{
+	"name": "door",
+	"interactions": [
+		"door"
+	],
+	"textures": {
+		"all": "kenney/Green/texture_01.png",
+	}
+}

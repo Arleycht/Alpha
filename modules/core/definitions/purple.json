@@ -1,0 +1,6 @@
+{
+	"name": "purple",
+	"textures": {
+		"all": "kenney/Purple/texture_01.png",
+	}
+}

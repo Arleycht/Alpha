@@ -39,7 +39,7 @@ func _physics_process(delta: float) -> void:
 		var current_task = assigned_tasks[-1]
 		
 		if not current_task.is_at_task(self):
-			print("Not at task!")
+#			print("Not at task!")
 			
 			# Task is unworkable, try to path to it
 			if navigator.is_path_empty():
@@ -59,7 +59,7 @@ func _physics_process(delta: float) -> void:
 				else:
 					print("Found path to task")
 		else:
-			print("Working...")
+#			print("Working...")
 			current_task.work(self)
 		
 		if current_task.is_done():

@@ -5,6 +5,10 @@ static func align_vector(v: Vector3) -> Vector3i:
 	return Vector3i(v.floor())
 
 
+static func get_block_pos(v: Vector3) -> Vector3i:
+	return align_vector(v / Constants.BLOCK_SIZE)
+
+
 ## Returns the AABB that describes the volume between u and v
 static func get_aabb(u: Vector3i, v: Vector3i) -> AABB:
 	var size: Vector3i = abs(v - u)

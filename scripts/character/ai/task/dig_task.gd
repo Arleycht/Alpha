@@ -36,7 +36,6 @@ func get_goal() -> Vector3i:
 func is_at_task(unit: Unit) -> bool:
 	var diff := (unit.position - Vector3(_target) - Vector3(0.5, 0.5, 0.5)).abs()
 	var distance: float = max(diff.x, diff.y, diff.z)
-	print(distance)
 	return distance <= 1.5 and distance > 0.9
 
 

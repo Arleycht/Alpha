@@ -1,0 +1,6 @@
+{
+	"name": "light",
+	"textures": {
+		"all": "kenney/Light/texture_07.png",
+	}
+}
