@@ -9,6 +9,11 @@
 config_version=5
 
 _global_script_classes=[{
+"base": "Resource",
+"class": &"BuildTask",
+"language": &"GDScript",
+"path": "res://scripts/character/ai/task/build_task.gd"
+}, {
 "base": "Control",
 "class": &"BuildTool",
 "language": &"GDScript",
@@ -70,6 +75,7 @@ _global_script_classes=[{
 "path": "res://scripts/world/world_loader.gd"
 }]
 _global_script_class_icons={
+"BuildTask": "",
 "BuildTool": "",
 "CameraController": "",
 "Character": "",

@@ -25,10 +25,10 @@ func use(player: Player, event: InputEvent) -> bool:
 			elif event.is_action_released("primary"):
 				_end = prev_pos
 				
-				var aabb := Util.get_aabb(_start, _end)
-				
-				player.world.tool.value = player.world._loader.id_map["core:dirt"]
-				player.world.tool.do_box(aabb.position, aabb.end)
+				Util.for_each_cell(Util.get_aabb(_start, _end), func(pos):
+					var task = BuildTask.new(player.world, player.current_priority, pos, "core:dirt")
+					player.daemon.add_task(task)
+				)
 			
 			return true
 	

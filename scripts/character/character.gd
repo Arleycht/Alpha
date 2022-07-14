@@ -65,6 +65,8 @@ func get_aabb() -> AABB:
 		if c is CollisionShape3D:
 			aabb = aabb.merge(c.shape.get_debug_mesh().get_aabb())
 	
+	aabb.position += position
+	
 	return aabb
 
 

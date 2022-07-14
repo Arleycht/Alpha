@@ -6,19 +6,25 @@ signal loaded
 
 var library: VoxelBlockyLibrary
 var materials: Array
-var voxel_definitions := {}
-var atlas_map := {}
-var id_map := {}
-var name_map := {}
+var voxel_definitions: Dictionary
+var atlas_map: Dictionary
+var id_map: Dictionary
+var name_map: Dictionary
 var atlas_image: Image
 var atlas_texture: ImageTexture
 
 
-func _init() -> void:
-	call_deferred("_load")
-
-
-func _load() -> void:
+func load_definitions() -> void:
+	# Clear/initialize variables
+	
+	library = VoxelBlockyLibrary.new()
+	materials = []
+	voxel_definitions = {}
+	atlas_map = {}
+	id_map = {}
+	name_map = {}
+	atlas_image = Image.new()
+	
 	# Load from config
 	
 	var modules := _load_modules()
@@ -68,8 +74,6 @@ func _load() -> void:
 	# Stitch textures
 	
 	var size := _pack_atlas(atlas_map)
-	
-	atlas_image = Image.new()
 	atlas_image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
 	
 	for texture_id in atlas_map:
@@ -86,10 +90,10 @@ func _load() -> void:
 	default_material.albedo_texture = atlas_texture
 	default_material.vertex_color_use_as_albedo = true
 	default_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	materials.append(default_material)
 	
-	# Create library
+	# Load library
 	
-	library = VoxelBlockyLibrary.new()
 	library.voxel_count = 1
 	library.bake_tangents = false
 	library.create_voxel(0, "empty")

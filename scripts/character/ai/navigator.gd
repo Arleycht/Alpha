@@ -3,6 +3,7 @@ extends Resource
 
 
 var unit: Unit
+var world: World
 
 var _path: Array
 var _path_index: int
@@ -17,14 +18,14 @@ func update() -> void:
 	if not is_path_empty():
 		var target := get_position()
 		var close_enough := maxf(unit.get_aabb().size.x, unit.get_aabb().size.z)
-		var last := (_path_index == _path.size() - 1)
+		var last := (_path_index >= _path.size() - 1)
 		
 		if last:
 			close_enough *= 0.1
 		elif close_enough > 0.5:
-			close_enough *= 0.5
+			close_enough *= 0.4
 		else:
-			close_enough = 0.5
+			close_enough = 0.4
 		
 		# TODO: Check if the current waypoint is part of a horizontal corner
 		# that is blocked on one side, and adjust the waypoint to make the
@@ -50,9 +51,13 @@ func update() -> void:
 		# Increment path position
 		
 		if h_diff.length_squared() < pow(close_enough, 2) and abs(diff.y) < 0.5:
-			increment_position()
+			if last:
+				_path.clear()
+			else:
+				_path_index += 1
 		
 		if Time.get_ticks_msec() - _prev_check_msec > 5000:
+			# Stuck, just cancel the path
 			if (_prev_pos - unit.position).length_squared() < 2.25:
 				_path.clear()
 			
@@ -66,7 +71,24 @@ func move_to(from: Vector3, to: Vector3) -> void:
 	
 	var from_i := Util.align_vector(from)
 	var to_i := Util.align_vector(to)
-	_pathfind(from_i, to_i)
+	_a_star(from_i, to_i)
+
+
+func move_to_adjacent(from: Vector3, to: Vector3) -> void:
+	if not unit.is_loaded():
+		return
+	
+	var positions := get_standable_neighbors(to)
+	
+	if positions.size() < 1:
+		_path.clear()
+		return
+	
+	to = positions[randi_range(0, positions.size() - 1)]
+	
+	var from_i := Util.align_vector(from)
+	var to_i := Util.align_vector(to)
+	_a_star(from_i, to_i)
 
 
 func get_position() -> Vector3:
@@ -76,41 +98,66 @@ func get_position() -> Vector3:
 	return Vector3(_path[_path_index]) + Vector3(0.5, 0, 0.5)
 
 
-func increment_position() -> void:
-	_path_index += 1
-
-
-func set_path_index(i: int) -> void:
-	_path_index = i
-
-
-func get_path_index() -> int:
-	return _path_index
-
-
-func get_path_length() -> int:
-	return _path.size()
-
-
 func is_path_empty() -> bool:
 	return _path.size() < 1 or _path_index > _path.size() - 1
 
 
-func _is_valid_floor(pos: Vector3i) -> bool:
-	var voxel_id: String = unit.get_world().get_voxel(pos)
-	# TODO: Get these from configuration, i.e. voxels tagged with something
-	# that says they are a valid floor voxel
-	return voxel_id not in ["core:air"]
+func _is_standable(pos: Vector3) -> bool:
+	return world.has_floor(pos) and not world.is_collidable(pos)
 
 
-func _is_valid_air(pos: Vector3i) -> bool:
-	var voxel_id: String = unit.get_world().get_voxel(pos)
-	# TODO: Get these from configuration
-	return voxel_id in ["core:air"]
+func get_standable_neighbors(pos: Vector3i) -> Array:
+	var neighbors := []
+	
+	for i in range(-1, 2):
+		for j in range(-1, 2):
+			for k in range(-1, 2):
+				var n := pos + Vector3i(i, j, k)
+				
+				if _is_standable(n):
+					neighbors.append(n)
+	
+	return neighbors
 
 
-func _is_valid_standing_position(pos: Vector3i) -> bool:
-	return _is_valid_floor(pos - Vector3i(0, 1, 0)) and _is_valid_air(pos)
+func _is_traversable(from: Vector3i, to: Vector3i, clearance_fn: Callable) -> bool:
+	var current := from
+	var delta := sign(to - from) as Vector3i
+	var dx = Vector3i(delta.x, 0, 0)
+	var dy = Vector3i(0, delta.y, 0)
+	var dz = Vector3i(0, 0, delta.z)
+	
+	while current != to:
+		if current.y != to.y:
+			if delta.y > 0:
+				if world.is_collidable(current + dy):
+					# There is a ceiling, we cannot go up
+					return false
+				else:
+					# Clear to check only horizontals as long as we ascend
+					current += dy
+			else:
+				if world.is_collidable(current + dx) or world.is_collidable(current + dz):
+					# Prevent going diagonally down through a wall
+					return false
+				
+				current += dy
+		elif current.x != to.x and not world.is_collidable(current + dx):
+			if current.z != to.z and world.is_collidable(current + dz):
+				# Prevent corner cutting
+				return false
+			else:
+				current += dx
+		elif current.z != to.z and not world.is_collidable(current + dz):
+			if current.x != to.x and world.is_collidable(current + dx):
+				# Prevent corner cutting
+				return false
+			else:
+				current += dz
+		else:
+			return false
+	
+	return true
 
 
 func _cost(a: Vector3i, b: Vector3i) -> float:
@@ -122,38 +169,17 @@ func _cost(a: Vector3i, b: Vector3i) -> float:
 		v *= 2.8
 	else:
 		# Incentivize dropping down
-		v = 0
+		v *= 0
 	
 	return h + v
 
 
 func _heuristic(a: Vector3i, b: Vector3i) -> float:
-	a.y = 0
-	b.y = 0
+	if b.y < a.y:
+		# Only reduce heuristic distance if goal is below us
+		a.y = 0
+		b.y = 0
 	return (b - a).length_squared() as float * 0.5
-
-
-func _is_traversal_clear(from: Vector3i, to: Vector3i, clearance_fn: Callable) -> bool:
-	var current := from
-	var delta := sign(to - from) as Vector3i
-	var dx = Vector3i(delta.x, 0, 0)
-	var dy = Vector3i(0, delta.y, 0)
-	var dz = Vector3i(0, 0, delta.z)
-	
-	while current != to:
-		if current.x != to.x and clearance_fn.call(current + dx):
-			current += dx
-		elif current.z != to.z and clearance_fn.call(current + dz):
-			current += dz
-		elif current.y != to.y:
-			if delta.y > 0 and !_is_valid_air(current + dy):
-				return false
-			else:
-				current += dy
-		else:
-			return false
-	
-	return true
 
 
 func _get_neighbors(pos: Vector3i) -> Array:
@@ -170,10 +196,24 @@ func _get_neighbors(pos: Vector3i) -> Array:
 	return neighbors
 
 
-func _pathfind(from: Vector3i, to: Vector3i,
-		clearance_fn: Callable = _is_valid_standing_position,
-		cost_fn: Callable = _cost, heuristic_fn: Callable = _heuristic,
-		max_path_length: int = 1024) -> void:
+func _is_accessible(from: Vector3i, to: Vector3i) -> bool:
+	var explored := []
+	var queue := [from]
+	
+	while queue.size() > 0:
+		for n in _get_neighbors(queue.pop_back()):
+			if n == to:
+				return true
+			elif world.has_floor(n) and n not in explored:
+				queue.append(n)
+				explored.append(n)
+	
+	return false
+
+
+func _a_star(from: Vector3i, to: Vector3i,
+		clearance_fn: Callable = _is_standable, cost_fn: Callable = _cost,
+		heuristic_fn: Callable = _heuristic, adjacent: bool = false) -> void:
 	# If the character is standing over an invalid position, but is actually
 	# standing on the edge of a valid position, try to find the valid position
 	# and use it as the origin instead
@@ -193,16 +233,17 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		if not found:
 			return
 	
-	if not clearance_fn.call(to) or not unit.get_world().is_position_loaded(to):
+	if not clearance_fn.call(to) or not unit.world.is_position_loaded(to):
+		return
+	
+	if not _is_accessible(from, to):
 		return
 	
 	var open := [from]
 	var map := {}
-	var length := {}
 	var g_score := {}
 	var f_score := {}
 	
-	length[from] = 0
 	g_score[from] = 0.0
 	f_score[from] = heuristic_fn.call(from, to)
 	
@@ -227,24 +268,20 @@ func _pathfind(from: Vector3i, to: Vector3i,
 		
 		open.erase(current)
 		
-		if length[current] >= max_path_length:
-			continue
-		
 		var neighbors = _get_neighbors(current)
 		neighbors.shuffle()
 		
 		for n in neighbors:
-			if not unit.get_world().is_position_loaded(n):
+			if not unit.world.is_position_loaded(n):
 				continue
 			
-			if not clearance_fn.call(n) or not _is_traversal_clear(current, n, clearance_fn):
+			if not clearance_fn.call(n) or not _is_traversable(current, n, clearance_fn):
 				continue
 			
 			var new_g_score = g_score[current] + cost_fn.call(current, n)
 			
-			if n not in g_score or new_g_score < g_score[n]:
+			if new_g_score < g_score.get(n, INF):
 				map[n] = current
-				length[n] = length[current] + 1
 				g_score[n] = new_g_score
 				f_score[n] = new_g_score + heuristic_fn.call(n, to)
 				

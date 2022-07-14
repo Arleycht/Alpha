@@ -5,9 +5,10 @@ extends Node3D
 signal block_loaded
 signal block_unloaded
 signal mesh_changed
+signal voxel_updated
 
+var loader: WorldLoader
 
-var _loader: WorldLoader
 var _stream: VoxelStreamSQLite
 
 var terrain: VoxelTerrain
@@ -18,10 +19,6 @@ var _last_save_ticks := Time.get_ticks_msec()
 
 
 func _ready() -> void:
-	_loader = WorldLoader.new()
-	
-	await _loader.loaded
-	
 	_stream = VoxelStreamSQLite.new()
 	_stream.database_path = OS.get_user_data_dir() + "/test.db"
 	
@@ -34,7 +31,7 @@ func _ready() -> void:
 	
 	# Test mesher
 	var mesher := VoxelMesherBlocky.new()
-	mesher.library = _loader.library
+	mesher.library = loader.library
 	
 	terrain = VoxelTerrain.new()
 	tool = terrain.get_voxel_tool()
@@ -78,18 +75,66 @@ func _physics_process(delta: float) -> void:
 
 func set_voxel(pos: Vector3i, voxel_name: String) -> bool:
 	if tool.is_area_editable(AABB(pos, Vector3.ONE)):
-		tool.set_voxel(pos, _loader.id_map[voxel_name])
+		tool.set_voxel(pos, loader.id_map[voxel_name])
 		return true
 	
 	return false
 
 
-func get_voxel(pos: Vector3i) -> String:
-	return _loader.name_map[tool.get_voxel(pos)]
+func get_voxel(pos: Vector3) -> String:
+	return loader.name_map[tool.get_voxel(Util.align_vector(pos))]
+
+
+func get_definition(voxel_name: String) -> Dictionary:
+	return loader.voxel_definitions.get(voxel_name, {})
+
+
+func has_floor(pos: Vector3) -> bool:
+	return not is_collidable(pos) and is_collidable(pos + Vector3(0, -1, 0))
+
+
+## Returns true if the voxel at the position has collision
+func is_collidable(pos: Vector3) -> bool:
+	var voxel_name := get_voxel(pos)
+	
+	if voxel_name == "core:air":
+		return false
+	
+	if voxel_name not in loader.voxel_definitions:
+		return false
+	
+	if 'can_collide' in loader.voxel_definitions[voxel_name]:
+		return loader.voxel_definitions[voxel_name]['can_collide'] as bool
+	
+	return true
+
+
+## Returns true if the voxel at the position can be passed, possibly with
+## interaction (i.e. doors)
+func is_passable(pos: Vector3) -> bool:
+	var def := get_definition(get_voxel(pos))
+	
+	if 'interactions' in def and 'door' in def['interactions']:
+		return true
+	
+	return false
 
 
 func is_out_of_bounds(pos: Vector3) -> bool:
 	return not terrain.bounds.has_point(pos)
+
+
+func is_obstructed(pos: Vector3) -> bool:
+	if is_collidable(pos):
+		return true
+	else:
+		var aabb := AABB(pos, Vector3.ONE)
+		
+		for character in find_children("*", "Character", true, false):
+			if aabb.intersects(character.get_aabb()):
+				return true
+	
+	return false
 
 
 func is_position_loaded(pos: Vector3) -> bool:
@@ -119,6 +164,17 @@ func get_block_size() -> int:
 	return terrain.get_data_block_size()
 
 
+func get_standable_in_block(bpos: Vector3i) -> Array:
+	var positions := []
+	
+	Util.for_each_cell_in_block(bpos, func(x):
+		if not is_collidable(x) and is_collidable(x + Vector3i(0, 1, 0)):
+			positions.append(x)
+	)
+	
+	return positions
+
+
 func _deferred_mesh_update(bpos: Vector3i, loaded: bool) -> void:
 	if bpos in _loaded_blocks:
 		_loaded_blocks[bpos] = loaded
@@ -130,6 +186,8 @@ func _on_block_loaded(bpos: Vector3i) -> void:
 			set_voxel(pos, "core:grass")
 		elif get_voxel(pos) == "core:grass" and get_voxel(pos + Vector3i(0, 1, 0)) != "core:air":
 			set_voxel(pos, "core:dirt")
+		
+		await get_tree().create_timer(0.1).timeout
 	)
 	
 	if bpos not in _loaded_blocks:

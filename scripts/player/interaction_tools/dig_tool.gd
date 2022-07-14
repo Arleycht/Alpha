@@ -23,17 +23,10 @@ func use(player: Player, event: InputEvent) -> bool:
 			elif event.is_action_released("primary"):
 				_end = pos
 				
-				var positions := []
-				
 				Util.for_each_cell(Util.get_aabb(_start, _end), func(pos):
-					positions.append(pos)
-					print(pos)
+					var task = DigTask.new(player.world, player.current_priority, pos)
+					player.daemon.add_task(task)
 				)
-				
-				var task := DigTask.new(player.current_priority, positions)
-				player.daemon.add_task(task)
-				
-				player.clear_tool()
 			
 			return true
 	
