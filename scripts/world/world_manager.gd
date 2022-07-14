@@ -4,9 +4,16 @@ extends Node
 signal world_loaded
 
 var world: World
+var loader: WorldLoader
 
 var _environment_scene = preload("res://scenes/default_environment.tscn")
-var _player_scene = preload("res://scenes/player.tscn")
+## Some kind of change resulted in preloading the player not working
+## Possibly the same bug as described in one of:
+## https://github.com/godotengine/godot/issues/61043
+## https://github.com/godotengine/godot/issues/58551 (most likely)
+## If so, then another utility singleton to contain World/WorldLoader may
+## resolve this issue until it is fixed
+var _player_scene = load("res://scenes/player.tscn")
 
 
 func _ready() -> void:
@@ -23,7 +30,11 @@ func _notification(what: int):
 
 
 func load_world() -> void:
+	loader = WorldLoader.new()
+	loader.load_definitions()
+	
 	world = World.new()
+	world.loader = loader
 	world.name = "World"
 	world.add_child(_environment_scene.instantiate())
 	
@@ -33,7 +44,8 @@ func load_world() -> void:
 	
 	world_loaded.emit(world)
 	
-	spawn_player()
+	var p := spawn_player()
+	p.set_camera_position(Vector3(2.5, 1, 1) * Constants.BLOCK_SIZE)
 
 
 func spawn_player() -> Player:

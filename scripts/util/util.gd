@@ -39,12 +39,19 @@ static func for_each_cell_in_block(bpos: Vector3i, f: Callable) -> void:
 	var pos := bpos * Constants.BLOCK_SIZE
 	var size := Vector3i.ONE * Constants.BLOCK_SIZE
 	for_each_cell(AABB(pos, size), f)
+
+
+static func get_cells(aabb: AABB) -> Array:
+	var positions := []
+	var start := align_vector(aabb.position)
+	var end := align_vector(aabb.end)
 	
-#	for j in Constants.BLOCK_SIZE:
-#		for i in Constants.BLOCK_SIZE:
-#			for k in Constants.BLOCK_SIZE:
-#				if f.call(origin + Vector3i(i, j, k)):
-#					return
+	for j in end.y - start.y + 1:
+		for i in end.x - start.x + 1:
+			for k in end.z - start.z + 1:
+				positions.append(start + Vector3i(i, j, k))
+	
+	return positions
 
 
 static func raycast(world3d: World3D, from: Vector3, to: Vector3) -> Dictionary:
@@ -66,7 +73,7 @@ static func raycast(world3d: World3D, from: Vector3, to: Vector3) -> Dictionary:
 		return result_dict
 
 
-static func physics_cast_from_screen(camera: Camera3D,
+static func raycast_from_screen(camera: Camera3D,
 		max_distance: float = 100.0) -> Dictionary:
 	var mouse_pos := camera.get_viewport().get_mouse_position()
 	var from := camera.project_ray_origin(mouse_pos)
@@ -75,11 +82,8 @@ static func physics_cast_from_screen(camera: Camera3D,
 	return raycast(camera.get_world_3d(), from, to)
 
 
-static func voxel_cast_from_screen(world: World, camera: Camera3D,
+static func voxel_cast(world: World, from: Vector3, direction: Vector3,
 		max_distance: float = 100.0) -> Dictionary:
-	var mouse_pos := camera.get_viewport().get_mouse_position()
-	var from := camera.project_ray_origin(mouse_pos)
-	var direction := camera.project_ray_normal(mouse_pos)
 	var result := world.tool.raycast(from, direction, max_distance)
 	
 	if result == null:
@@ -94,3 +98,11 @@ static func voxel_cast_from_screen(world: World, camera: Camera3D,
 			'previous_position': result.previous_position,
 			'position': result.position,
 		}
+
+
+static func voxel_cast_from_screen(world: World, camera: Camera3D,
+		max_distance: float = 100.0) -> Dictionary:
+	var mouse_pos := camera.get_viewport().get_mouse_position()
+	var from := camera.project_ray_origin(mouse_pos)
+	var direction := camera.project_ray_normal(mouse_pos)
+	return voxel_cast(world, from, direction, max_distance)

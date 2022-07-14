@@ -62,7 +62,7 @@ func _input(event: InputEvent) -> void:
 		if not Input.is_action_pressed("control"):
 			clear_selection()
 		
-		var r := Util.physics_cast_from_screen(get_camera())
+		var r := Util.raycast_from_screen(get_camera())
 		
 		if r.collider != null:
 			if r.collider is Unit:
@@ -106,6 +106,11 @@ func get_camera_position() -> Vector3:
 	return $"Camera3D".global_transform.origin as Vector3
 
 
+func set_camera_position(pos: Vector3) -> void:
+	$"Camera3D".position = pos
+	$"Camera3D".target_y = pos.y
+
+
 func _update_markers() -> void:
 	var nodes := _markers.keys()
 	
@@ -138,13 +143,13 @@ func _try_get_tool(button: Button) -> Variant:
 	return null
 
 
-func _update_buttons():
+func _update_buttons() -> void:
 	for button in _get_mode_buttons():
 		if button is BaseButton:
-			if current_tool in button.get_children():
-				button.button_pressed = true
-			else:
+			if current_tool == null:
 				button.button_pressed = false
+			else:
+				button.button_pressed = current_tool in button.get_children()
 
 
 func _on_button_pressed(button: Button) -> void:
@@ -156,7 +161,7 @@ func _on_button_pressed(button: Button) -> void:
 		else:
 			current_tool = tool
 		
-		tool_changed.emit(tool)
+		tool_changed.emit()
 
 
 static func is_tool(tool: Variant) -> bool:
