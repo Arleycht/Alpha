@@ -45,6 +45,20 @@ static func for_each_cell_in_block(bpos: Vector3i, f: Callable) -> void:
 	for_each_cell(AABB(pos, size), f)
 
 
+static func get_neighbors(pos: Vector3i) -> Array:
+	var neighbors := []
+	
+	for j in range(-1, 2):
+		for i in range(-1, 2):
+			for k in range(-1, 2):
+				if i == 0 and j == 0 and k == 0:
+					continue
+
+				neighbors.append(pos + Vector3i(i, j, k))
+	
+	return neighbors
+
+
 static func get_cells(aabb: AABB) -> Array:
 	var positions := []
 	var start := align_vector(aabb.position)

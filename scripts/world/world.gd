@@ -15,7 +15,6 @@ var terrain: VoxelTerrain
 var tool: VoxelToolTerrain
 
 var island_map := {}
-var connected_islands := []
 var islands := []
 
 var _loaded_blocks := {}
@@ -181,26 +180,14 @@ func get_standable_in_block(bpos: Vector3i) -> Array:
 	return positions
 
 
-func get_neighbors(pos: Vector3i) -> Array:
-	var neighbors := []
-	
-	for j in range(-1, 2):
-		for i in range(-1, 2):
-			for k in range(-1, 2):
-				if i == 0 and j == 0 and k == 0:
-					continue
-
-				neighbors.append(pos + Vector3i(i, j, k))
-	
-	return neighbors
-
-
 func get_all_neighbors_in_block(bpos: Vector3i, pos: Vector3i) -> Array:
 	var explored := {pos: true}
 	var queue := [pos]
 	
 	while queue.size() > 0:
-		var neighbors := get_neighbors(queue.pop_back()).filter(func(x): return not x in explored and has_floor(x))
+		var neighbors := Util.get_neighbors(queue.pop_back()).filter(func(x):
+			return not x in explored and has_floor(x)
+		)
 		neighbors.map(func(x):
 			if Util.get_block_pos(x) == bpos:
 				queue.append(x)
@@ -219,12 +206,12 @@ func is_neighbor(u: Vector3i, v: Vector3i) -> bool:
 func is_island_connected(a: Dictionary, b: Dictionary) -> bool:
 	var explored := {}
 	
-	for u in a.keys().filter(is_edge_of_block):
+	for u in a['cells'].keys():
 		if not u in explored:
 			explored[u] = true
 			
-			for n in get_neighbors(u):
-				if n in b:
+			for n in Util.get_neighbors(u):
+				if n in b['cells']:
 					return true
 				else:
 					explored[n] = true
@@ -247,73 +234,28 @@ func get_islands(bpos: Vector3i) -> Array:
 	Util.for_each_cell_in_block(bpos, func(u):
 		# Only consider valid positions
 		if u not in explored and has_floor(u):
-			# Try to add u and its neighbors into an existing island
+			# Try to add u to an existing island
 			for island in block_islands:
-				if u in island:
+				if island['cells'].keys().any(func(v): return is_neighbor(u, v)):
 					explored[u] = true
-					return false
-				elif island.keys().any(func(v): return is_neighbor(u, v)):
-					explored[u] = true
-					island[u] = true
+					island['cells'][u] = true
 					return false
 			
 			# Create a new island if none contain u
-			var island := {}
+			var cells := {}
 			get_all_neighbors_in_block(bpos, u).map(func(x):
-				island[x] = true
+				cells[x] = true
 				explored[x] = true
 			)
-			block_islands.append(island)
+			block_islands.append({
+				'position': bpos,
+				'cells': cells,
+			})
 		
 		return false
 	)
 	
 	return block_islands
-
-
-func merge_islands() -> void:
-	print("Merging pathfinding islands")
-	
-	islands = islands.reduce(func(acc, island):
-		if acc.size() < 1:
-			return [island]
-		
-		for j in acc.size():
-			if is_island_connected(island, acc[j]):
-				acc[j].append_array(island)
-				return acc
-		
-		acc.append(island)
-		return acc
-	, [])
-	
-	print("Pathfinding islands: %d" % islands.size())
-
-
-func update_connected_islands() -> void:
-	connected_islands.clear()
-	
-	if islands.size() < 1:
-		return
-	
-	var connected := {}
-	
-	for a in islands:
-		if a in connected:
-			continue
-		
-		var group = []
-		
-		for b in islands:
-			if not b in connected and is_island_connected(a, b):
-				group.append(b)
-				connected[b] = true
-		
-		connected[a] = true
-		
-		connected_islands.append(group)
-	
-	print(connected_islands.size())
 
 
 func _deferred_mesh_update(bpos: Vector3i, loaded: bool) -> void:
@@ -339,7 +281,6 @@ func _on_block_loaded(bpos: Vector3i) -> void:
 	if block_islands.size() > 0:
 		island_map[bpos] = block_islands
 		islands.append_array(block_islands)
-		update_connected_islands()
 
 		print("Pathfinding islands: %d" % islands.size())
 
@@ -347,8 +288,11 @@ func _on_block_loaded(bpos: Vector3i) -> void:
 func _on_block_unloaded(bpos: Vector3i) -> void:
 	_loaded_blocks.erase(bpos)
 	
-#	for i in islands.size():
-#		islands[i] = islands[i].filter(func(p): return Util.get_block_pos(p) != bpos)
+	if bpos in island_map:
+		for island in island_map[bpos]:
+			islands.erase(island)
+	
+	island_map.erase(bpos)
 
 
 func _on_mesh_block_loaded(bpos: Vector3i) -> void:
